@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Noto Sans Georgia", sans-serif;
+}
+
+.text-sm {
+  font-size: 15px;
+}
+
+input,
+textarea,
+select {
+  outline: none;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+@keyframes light-move {
+  0% {
+    transform: translateX(100%) skew(30deg);
+  }
+  100% {
+    transform: translateX(-100%) skew(30deg);
+  }
+}
+
+@layer utilities {
+  .animate-light-move {
+    animation: light-move 1s ease-out;
+  }
+}
+::-webkit-scrollbar {
+  width: 6px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #38ade3;
+  border-radius: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #c9dfed;
+}

@@ -1,0 +1,231 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              Int               @id @default(autoincrement())
+  name            String?
+  email           String            @unique
+  password        String?
+  image           String?
+  phoneNumber     String?
+  emailVerified   DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  orders          Order[]
+  cart            Cart?
+  role            Role              @default(CUSTOMER)
+  ShippingAddress ShippingAddress[]
+  Review          Review[]
+  Wishlist        Wishlist?
+}
+
+model Product {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  description        String?
+  price              Float
+  stock              Int
+  images             ProductImage[]
+  category           Category             @relation(fields: [categoryId], references: [id])
+  categoryId         Int
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  OrderItem          OrderItem[]
+  CartItem           CartItem[]
+  ProductPerformance ProductPerformance[]
+  Review             Review[]
+  WishlistItem       WishlistItem[]
+  Color              Color[]              @relation("ProductColors")
+  Size               Size[]               @relation("ProductSizes")
+  variants           ProductVariant[]
+}
+
+model ProductVariant {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  colorId   Int? 
+  sizeId    Int? 
+  stock     Int
+  product   Product @relation(fields: [productId], references: [id])
+  color     Color?  @relation(fields: [colorId], references: [id]) 
+  size      Size?   @relation(fields: [sizeId], references: [id]) 
+}
+
+model Color {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  products       Product[]        @relation("ProductColors") 
+  ProductVariant ProductVariant[]
+}
+
+model Size {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  products       Product[]        @relation("ProductSizes") // Many-to-many relation to Product model
+  ProductVariant ProductVariant[]
+}
+
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  url       String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  userId    Int
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Category {
+  id       Int     @id @default(autoincrement())
+  name     String
+  imageUrl String?
+
+  parentId Int?
+  parent   Category?  @relation("CategoryParent", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryParent")
+
+  Product Product[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  price     Float
+  product   Product @relation(fields: [productId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id])
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id])
+  cartItems CartItem[]
+}
+
+model CartItem {
+  id            Int     @id @default(autoincrement())
+  cartId        Int
+  productId     Int
+  quantity      Int
+  product       Product @relation(fields: [productId], references: [id])
+  cart          Cart    @relation(fields: [cartId], references: [id])
+  selectedColor String?
+  selectedSize  String?
+}
+
+model Wishlist {
+  id        Int            @id @default(autoincrement())
+  userId    Int            @unique
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  user      User           @relation(fields: [userId], references: [id])
+  items     WishlistItem[]
+}
+
+model WishlistItem {
+  id         Int      @id @default(autoincrement())
+  wishlistId Int
+  productId  Int
+  product    Product  @relation(fields: [productId], references: [id])
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id])
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  orderNumber String      @unique
+  userId      Int
+  totalAmount Float
+  status      OrderStatus
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User        @relation(fields: [userId], references: [id])
+  items       OrderItem[]
+
+  payment Payment?
+}
+
+model Payment {
+  id        Int           @id @default(autoincrement())
+  orderId   Int           @unique
+  amount    Float
+  status    PaymentStatus
+  method    PaymentMethod
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  order     Order         @relation(fields: [orderId], references: [id])
+}
+
+model ShippingAddress {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  address    String
+  city       String
+  postalCode String
+  country    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model SalesAnalytics {
+  id           Int      @id @default(autoincrement())
+  date         DateTime @default(now())
+  totalSales   Float
+  totalOrders  Int
+  totalUsers   Int
+  totalRevenue Float
+}
+
+model ProductPerformance {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  totalSold Int
+  revenue   Float
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  SHIPPED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  PAYPAL
+  STRIPE
+  CASH_ON_DELIVERY
+}
