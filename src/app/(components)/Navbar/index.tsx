@@ -129,9 +129,6 @@ const Navbar = () => {
           showResults ? "block" : "hidden"
         } fixed bg-gray-800 inset-0 z-30 h-full bg-opacity-60`}
       ></div>
-      <Link href="/" className="absolute left-0">
-        <img src="/logo.png" className="w-44" alt="logo" />
-      </Link>
       <div className="flex justify-between w-full items-center gap-5">
         <button
           className="px-3 py-3 bg-gray-100 rounded-full hover:bg-blue-100"

@@ -31,8 +31,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       try {
         const CartegoryResp = await axios.get("/api/categories?top=true");
         dispatch(setCategories(CartegoryResp.data.categories));
-        // const ProductsResp = await axios.get("/api/products");
-        // dispatch(setIsProducts(ProductsResp.data.products));
       } catch (error: unknown) {
         console.log("Error while getting categories");
       }

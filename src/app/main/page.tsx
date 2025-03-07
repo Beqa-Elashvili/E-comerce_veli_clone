@@ -9,6 +9,7 @@ import useAddToCartMain from "../hooks/addToCartMain";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import CarouselComp from "../(components)/Carousel/Carousel";
+import { TableOfContents, X } from "lucide-react";
 
 function Main() {
   const router = useRouter();
@@ -55,30 +56,75 @@ function Main() {
     );
   };
 
+  const [isAllCategories, setIsAllCategories] = useState<boolean>(false);
+
+  if (isAllCategories) {
+    return (
+      <div className="space-y-8">
+        <div className="flex justify-between items-center">
+          <h1 className="text-4xl font-semibold h-full">ყველა კატეგორია</h1>
+          <X
+            onClick={() => setIsAllCategories(false)}
+            className="size-10  bg-gray-200 rounded-full p-1 cursor-pointer hover:bg-gray-300 transition duration-300"
+          />
+        </div>
+        <div className="grid grid-cols-4 gap-4 justify-between h-full w-full">
+          {categories?.map((item: Category) => (
+            <div
+              key={item.id}
+              onClick={() => router.push(`/category/${item.name}`)}
+            >
+              <div className="bg-gray-200 relative cursor-pointer h-full hover:bg-gray-300 overflow-hidden rounded-lg">
+                <h2 className="px-2 flex items-center text-balance py-8  tracking-wider">
+                  {item.name}
+                </h2>
+                <img
+                  className="h-40 object-contain absolute -right-14 -bottom-16"
+                  src={item.imageUrl}
+                  alt="image"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full flex flex-col gap-12 mb-20">
-      <img className="rounded-lg" src="/cover.png" alt="cover-img" />
-      <CarouselComp>
-        {categories?.map((item: Category) => (
-          <div
-            key={item.id}
-            onClick={() => router.push(`/category/${item.name}`)}
-            className="px-2  text-center h-full overflow-hidden max-w-52"
-          >
-            <div className="bg-gray-200  cursor-pointer hover:bg-gray-300 overflow-hidden rounded-lg">
-              <h2 className="px-2 text-balance h-20 py-6 font-semibold tracking-wider">
-                {item.name}
-              </h2>
-              <img
-                className="h-40 object-cover"
-                src={item.imageUrl}
-                alt="image"
-              />
-            </div>
-          </div>
-        ))}
-      </CarouselComp>
-      <img src="/cover2.png" className="rounded-lg" alt="cover-two" />
+      <div className="flex items-center text-center gap-4">
+        <div
+          onClick={() => setIsAllCategories(true)}
+          className="bg-black mt-4 cursor-pointer text-white flex flex-col gap-4 items-center justify-center rounded-lg p-4 h-44 w-40"
+        >
+          <TableOfContents className="size-10" />
+          ყველა კატეგორია
+        </div>
+        <div className="w-full h-full px-4 overflow-hidden">
+          <CarouselComp>
+            {categories?.map((item: Category) => (
+              <div
+                key={item.id}
+                onClick={() => router.push(`/category/${item.name}`)}
+                className="text-center h-44 max-w-40"
+              >
+                <div className="bg-gray-200 relative cursor-pointer h-full hover:bg-gray-300 overflow-hidden rounded-lg">
+                  <h2 className="px-2 text-balance h-20 py-6 font-semibold tracking-wider">
+                    {item.name}
+                  </h2>
+                  <img
+                    className="h-40 object-contain absolute -right-12 -bottom-12"
+                    src={item.imageUrl}
+                    alt="image"
+                  />
+                </div>
+              </div>
+            ))}
+          </CarouselComp>
+        </div>
+      </div>
+      <img src="/cover1.jpg" alt="image" className="rounded-lg" />
       <CarouselComp MainTitle="განახლებული კოლექცია">
         {products?.map((product: Product) => {
           const isCart = handleIsCart(product.id);
