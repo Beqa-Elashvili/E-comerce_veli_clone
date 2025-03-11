@@ -316,7 +316,7 @@ function ProductId({ params }: ProductIdProps) {
                     }
                     className={`ring-1 ${
                       avaliable.selectedColor === item.name ? "ring-4" : ""
-                    }  w-10 h-10 flex items-center hover:ring-2 transition duration-300 hover:bg-sky-100 cursor-pointer justify-center rounded-lg`}
+                    }  min-w-10 h-10 px-2 flex items-center hover:ring-2 transition duration-300 hover:bg-sky-100 cursor-pointer justify-center rounded-lg`}
                     key={item.id}
                   >
                     {item.name}

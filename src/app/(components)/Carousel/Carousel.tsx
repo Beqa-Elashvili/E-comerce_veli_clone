@@ -46,7 +46,6 @@ function CarouselComp({
           nextArrow={<NextArrow />}
           prevArrow={<PrevArrow />}
           arrows
-          infinite={true}
           slidesToShow={6}
           dots={false}
         >

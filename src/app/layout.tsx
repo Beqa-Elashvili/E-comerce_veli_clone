@@ -26,7 +26,7 @@ export default function RootLayout({
       container.addEventListener("wheel", handleWheel);
 
       return () => {
-        container.removeEventListener("wheel", handleWheel); // Cleanup
+        container.removeEventListener("wheel", handleWheel); 
       };
     }
   }, []);

@@ -27,11 +27,24 @@ export default function useAddToCartMain() {
           };
         }
       );
+      const variantStock = variantDetails.find(
+        (item) =>
+          (cartItem.selectedColor === item.colorName &&
+            cartItem.selectedSize === item.sizeName) ||
+          (cartItem.selectedColor === item.colorName &&
+            !cartItem.selectedSize) ||
+          (cartItem.selectedSize === item.sizeName && !cartItem.selectedColor)
+      );
+
       const product: Product = {
         ...cartItem,
-        selectedColor: variantDetails[0].colorName,
-        selectedSize: variantDetails[0].sizeName,
-        VariantStock: variantDetails[0].VariantStock,
+        selectedColor:
+          cartItem.selectedColor || variantDetails[0].colorName || "",
+        selectedSize: cartItem.selectedSize || variantDetails[0].sizeName || "",
+        VariantStock:
+          variantStock?.VariantStock ||
+          variantDetails[0].VariantStock ||
+          cartItem.stock,
       };
 
       if (product) {

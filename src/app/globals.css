@@ -8,9 +8,8 @@
   box-sizing: border-box;
   font-family: "Noto Sans Georgia", sans-serif;
 }
-
-.text-sm {
-  font-size: 15px;
+.bg-main {
+  background-color: #b4d984;
 }
 
 input,

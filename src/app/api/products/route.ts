@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
             stock,
             categoryId,
             images: {
-              create: images.map((url: string) => ({ url })),
+              create: images.map((url: string) => ({ url })), // Store the images
             },
           },
           include: {
@@ -42,12 +42,13 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // Case when both colors and sizes are provided
-        if (colors.length > 0 && sizes.length > 0) {
+        // Handle product variants (Color-Size combinations)
+        if (variants.length > 0) {
           await Promise.all(
             variants.map(async (variant: any) => {
               const { colorName, sizeName, variantStock } = variant;
 
+              // Upsert color and size (create if not exists, or do nothing if already exists)
               const color = await prisma.color.upsert({
                 where: { name: colorName },
                 update: {},
@@ -60,59 +61,22 @@ export async function POST(req: NextRequest) {
                 create: { name: sizeName },
               });
 
+              // Create the product variant that associates color and size with the product
               await prisma.productVariant.create({
                 data: {
-                  productId: createdProduct.id,
-                  colorId: color.id,
-                  sizeId: size.id,
-                  stock: variantStock || stock, // Use the provided variant stock, fallback to product stock
-                },
-              });
-            })
-          );
-        }
-        // Case when only colors are provided (without sizes)
-        else if (colors.length > 0 && sizes.length === 0) {
-          await Promise.all(
-            colors.map(async (colorName: string) => {
-              const color = await prisma.color.upsert({
-                where: { name: colorName },
-                update: {},
-                create: { name: colorName },
-              });
-
-              await prisma.productVariant.create({
-                data: {
-                  productId: createdProduct.id,
-                  colorId: color.id,
-                  stock: stock, // Using the overall stock for each color variant
-                },
-              });
-            })
-          );
-        }
-        else if (sizes.length > 0 && colors.length === 0) {
-          await Promise.all(
-            sizes.map(async (sizeName: string) => {
-              const size = await prisma.size.upsert({
-                where: { name: sizeName },
-                update: {},
-                create: { name: sizeName },
-              });
-
-              await prisma.productVariant.create({
-                data: {
-                  productId: createdProduct.id,
-                  sizeId: size.id,
-                  stock: stock, 
+                  productId: createdProduct.id, // Link the variant to the product
+                  colorId: color.id, // Link the variant to the color
+                  sizeId: size.id, // Link the variant to the size
+                  stock: variantStock, // Use the provided stock for this variant
                 },
               });
             })
           );
         }
 
-        // If no variants are provided (neither colors nor sizes), just link sizes and colors directly
-        if (sizes.length > 0) {
+        // If no specific variants are provided, link the product directly to sizes and colors
+        if (sizes.length > 0 || colors.length > 0) {
+          // Link sizes to product if sizes are provided
           await Promise.all(
             sizes.map(async (sizeName: string) => {
               const size = await prisma.size.upsert({
@@ -131,9 +95,8 @@ export async function POST(req: NextRequest) {
               });
             })
           );
-        }
 
-        if (colors.length > 0) {
+          // Link colors to product if colors are provided
           await Promise.all(
             colors.map(async (colorName: string) => {
               const color = await prisma.color.upsert({
@@ -154,6 +117,7 @@ export async function POST(req: NextRequest) {
           );
         }
 
+        // Fetch the full product with variants, colors, sizes, and images
         const fullCreatedProduct = await prisma.product.findUnique({
           where: { id: createdProduct.id },
           include: {
@@ -246,6 +210,29 @@ export async function GET(req: NextRequest) {
     console.error("Error fetching products:", error);
     return NextResponse.json(
       { message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+export async function DELETE(req: NextRequest) {
+  try {
+    // Delete all product variants
+    await prisma.productVariant.deleteMany({});
+
+    // Delete all products
+    await prisma.product.deleteMany({});
+
+    return NextResponse.json(
+      {
+        message:
+          "All products and their variants have been deleted successfully",
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting all products:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }

@@ -37,7 +37,7 @@ function Main() {
       const resp = await axios.get("/api/products");
       setProducts(resp.data.products);
       const categoryResp = await axios.get(
-        "/api/categories?name=მამაკაცის ტანსაცმელი"
+        "/api/categories?name=კაცის ტანსაცმელი"
       );
       setManClothes(categoryResp.data.category);
     }
@@ -107,7 +107,7 @@ function Main() {
               <div
                 key={item.id}
                 onClick={() => router.push(`/category/${item.name}`)}
-                className="text-center h-44 max-w-40"
+                className="text-center h-44 max-w-36"
               >
                 <div className="bg-gray-200 relative cursor-pointer h-full hover:bg-gray-300 overflow-hidden rounded-lg">
                   <h2 className="px-2 text-balance h-20 py-6 font-semibold tracking-wider">

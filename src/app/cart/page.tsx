@@ -37,6 +37,7 @@ function Cart() {
       };
       addToCart(user?.id as unknown as string, productWithVariant, 1);
     } else {
+      console.log(product)
       addToCartWithVariants({ ...product, id: product.productId });
     }
   };
@@ -119,8 +120,6 @@ function Cart() {
   useEffect(() => {
     sortCart(sortOption);
   }, [sortOption, cart]);
-
-  console.log(loadingStates);
 
   return (
     <div className="min-h-screen  h-full pb-12">
