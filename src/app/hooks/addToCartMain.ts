@@ -35,7 +35,6 @@ export default function useAddToCartMain() {
             !cartItem.selectedSize) ||
           (cartItem.selectedSize === item.sizeName && !cartItem.selectedColor)
       );
-
       const product: Product = {
         ...cartItem,
         selectedColor:

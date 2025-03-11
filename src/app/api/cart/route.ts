@@ -35,6 +35,11 @@ export async function POST(req: NextRequest) {
     } of productsArray) {
       const foundProduct = await prisma.product.findUnique({
         where: { id: productId },
+        include: {
+          Color: true,
+          Size: true,
+          variants: true,
+        },
       });
 
       if (!foundProduct) {
@@ -46,38 +51,85 @@ export async function POST(req: NextRequest) {
 
       let availableStock = foundProduct.stock;
 
-      if (selectedColor && selectedSize) {
-        const color = await prisma.color.findFirst({
-          where: { name: selectedColor },
-        });
-
-        const size = await prisma.size.findFirst({
-          where: { name: selectedSize },
-        });
-
-        if (!color || !size) {
+      if (selectedColor) {
+        if (!foundProduct.Color.some((color) => color.name === selectedColor)) {
           return NextResponse.json(
-            { message: "Invalid color or size selected" },
+            { message: `Invalid color selected for this product` },
             { status: 400 }
           );
         }
 
-        const variant = await prisma.productVariant.findFirst({
-          where: {
-            productId: productId,
-            colorId: color.id,
-            sizeId: size.id,
-          },
-        });
+        const variant = foundProduct.variants.find(
+          (v) =>
+            v.colorId &&
+            foundProduct.Color.find((color) => color.id === v.colorId)?.name ===
+              selectedColor
+        );
 
         if (!variant) {
           return NextResponse.json(
-            { message: "Variant not found for selected options" },
+            { message: `Variant not found for the selected color` },
             { status: 404 }
           );
         }
 
         availableStock = variant.stock;
+      }
+      if (selectedSize) {
+        if (!foundProduct.Size.some((size) => size.name === selectedSize)) {
+          return NextResponse.json(
+            { message: `Invalid size selected for this product` },
+            { status: 400 }
+          );
+        }
+
+        const variant = foundProduct.variants.find(
+          (v) =>
+            v.sizeId &&
+            foundProduct.Size.find((size) => size.id === v.sizeId)?.name ===
+              selectedSize
+        );
+
+        if (!variant) {
+          return NextResponse.json(
+            { message: `Variant not found for the selected color` },
+            { status: 404 }
+          );
+        }
+
+        availableStock = variant.stock;
+      }
+
+      if (selectedSize && selectedColor) {
+        const size = await prisma.size.findFirst({
+          where: { name: selectedSize },
+        });
+
+        if (!size) {
+          return NextResponse.json(
+            { message: `Invalid size selected for this product` },
+            { status: 400 }
+          );
+        }
+
+        const sizeVariant = foundProduct.variants.find(
+          (v) =>
+            v.sizeId === size.id &&
+            v.colorId ===
+              foundProduct.Color.find((color) => color.name === selectedColor)
+                ?.id
+        );
+
+        if (!sizeVariant) {
+          return NextResponse.json(
+            {
+              message: `Variant not found for the selected size and color combination`,
+            },
+            { status: 404 }
+          );
+        }
+
+        availableStock = sizeVariant.stock;
       }
 
       const existingCartItem = cart.cartItems.find(
