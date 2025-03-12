@@ -23,34 +23,28 @@ import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { DotLoader } from "react-spinners";
-import { Product } from "@/app/types/globalStateTypes";
+import { Category, Product } from "@/app/types/globalStateTypes";
 import axios from "axios";
 import { usePathname } from "next/navigation";
 import { SyncLoader } from "react-spinners";
 import useHandleCartquantity from "@/app/hooks/useHandleCartQuantity";
+import CarouselComp from "../Carousel/Carousel";
+import { useRouter } from "next/navigation";
+import { TableOfContents } from "lucide-react";
 
 const Navbar = () => {
   const { status } = useSession();
   const dispatch = useAppDispatch();
   const pathname = usePathname();
+  const router = useRouter();
   const { handleCartQuantity } = useHandleCartquantity();
+  const categories = useAppSelector((state) => state.categories.Categories);
 
-  const isSideBarCollapsed = useAppSelector(
-    (state) => state.global.isSideBarCollapsed
-  );
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
   const toggleTheme = () => {
     dispatch(setISDarkMode(!isDarkMode));
   };
-
-  const toggleSideBarCollapsed = () => {
-    dispatch(setIsSideBarCollapsed(!isSideBarCollapsed));
-  };
-
-  const cart = useAppSelector(
-    (state) => state.global.isCartItemUnauthentificated
-  );
 
   const SignOut = () => {
     dispatch(setIsCartItemUnauthentificated([]));
@@ -63,6 +57,7 @@ const Navbar = () => {
   const [value, setValue] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showResults, setShowResults] = useState<boolean>(false);
 
   async function getSearchResult(query: string) {
     try {
@@ -80,7 +75,6 @@ const Navbar = () => {
       setLoading(false);
     }
   }
-  const [showResults, setShowResults] = useState<boolean>(false);
 
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -128,7 +122,7 @@ const Navbar = () => {
 
   return (
     <div
-      className={`flex justify-between gap-12 bg-main py-4 px-2 lg:px-8 xl:px-40 items-center w-full`}
+      className={`flex justify-between gap-12 bg-main py-4 px-2 lg:px-8 xl:px-40 items-center w-full mb-7`}
     >
       <div
         ref={searchRef}

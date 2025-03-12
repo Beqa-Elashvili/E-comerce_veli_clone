@@ -70,10 +70,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <div
         className={` ${
           isDarkMode ? "dark" : "light"
-        } flex flex-col w-full min-h-screen bg-gray-50`}
+        } flex flex-col w-full min-h-screen relative bg-gray-50`}
       >
         <Navbar />
-        <main className={` ${!isAuth && "px-4 lg:px-8 xl:px-40 mt-7"} `}>
+        <main className={` ${!isAuth && "px-4 lg:px-8 xl:px-40"} `}>
           {children}
         </main>
       </div>
