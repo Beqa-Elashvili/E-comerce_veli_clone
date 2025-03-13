@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import useGetUser from "./actions/getUser";
 import useGetCartItems from "./hooks/getCartItems";
 import useGetWishlistItems from "./hooks/getWislistItems";
+import AllCategories from "./(components)/AllCategories/isAllCategories";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { status } = useSession();
@@ -56,6 +57,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     }
   });
 
+  const isAllCategories = useAppSelector(
+    (state) => state.categories.isAllCategories
+  );
   const isAuth = pathname === "/authentification" ? true : false;
 
   return (
@@ -74,7 +78,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       >
         <Navbar />
         <main className={` ${!isAuth && "px-4 lg:px-8 xl:px-40"} `}>
-          {children}
+          {isAllCategories ? <AllCategories /> : <> {children}</>}
         </main>
       </div>
     </div>

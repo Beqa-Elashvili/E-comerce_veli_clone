@@ -105,7 +105,7 @@ function Register() {
                 });
                 await GetCart();
                 localStorage.removeItem("cart");
-                console.log("Products added to cart");
+                console.log("პროდუქტები დაემატა კალათაში");
               }
             }
             toast.success("Logged in!");
@@ -140,12 +140,7 @@ function Register() {
   };
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center ">
-      <img
-        className="absolute z-0 inset-0 w-screen h-screen object-cover"
-        src="/cover.png"
-        alt="cover"
-      />
+    <div className=" w-full h-full flex items-center justify-center ">
       <div className="border bg-white py-12 mx-4 px-4 z-40 mt-12 w-full md:w-2/3 lg:w-1/2 m-auto shadow-custom-light rounded-lg flex flex-col items-center justify-center h-full">
         <div className="font-bold   text-md  w-4/6  md:text-2xl flex items-center justify-between gap-8">
           <div

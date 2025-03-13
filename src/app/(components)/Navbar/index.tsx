@@ -10,6 +10,7 @@ import {
   Search,
   X,
   Trash,
+  TableOfContents,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -23,7 +24,7 @@ import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { DotLoader, GridLoader } from "react-spinners";
-import { CartItem, Product } from "@/app/types/globalStateTypes";
+import { Category, Product } from "@/app/types/globalStateTypes";
 import axios from "axios";
 import { usePathname } from "next/navigation";
 import { SyncLoader } from "react-spinners";
@@ -34,6 +35,8 @@ import useAddToCartMain from "@/app/hooks/addToCartMain";
 import useDeleteCartItem from "@/app/hooks/useDeleteCartItem";
 import useAddToCart from "@/app/hooks/addToCart";
 import useHandleQuantityIncart from "@/app/hooks/useHandleQuantityInCart";
+import CarouselComp from "../Carousel/Carousel";
+import { setIsAllCategories } from "@/redux/categorySlice";
 
 const Navbar = () => {
   const { status } = useSession();
@@ -170,6 +173,7 @@ const Navbar = () => {
       addToCartWithVariants({ ...product, id: product.productId });
     }
   };
+  const categories = useAppSelector((state) => state.categories.Categories);
 
   const handleCartItemId = async (product: Product) => {
     if (status === "unauthenticated") {
@@ -225,6 +229,30 @@ const Navbar = () => {
         setLoadingStates((prev) => ({ ...prev, [product.productId]: false }));
       } catch (error: unknown) {}
     }
+  };
+
+  const [isSticky, setIsSticky] = useState(false);
+
+  const handleScroll = () => {
+    const scrollTop = window.scrollY;
+    if (scrollTop > 400) {
+      setIsSticky(true);
+    } else {
+      setIsSticky(false);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const handleIsAllCategories = (href: string) => {
+    dispatch(setIsAllCategories(false));
+    router.push(href);
   };
 
   return (
@@ -329,7 +357,7 @@ const Navbar = () => {
             <div
               ref={cartRef}
               onClick={() => setShowCart((prev) => !prev)}
-              className=" relative group flex rounded-lg h-[40px] overflow-hidden p-2 items-center hover:ring-1 ring-white transition duration-300 gap-2"
+              className=" relative cursor-pointer group flex rounded-lg h-[40px] overflow-hidden p-2 items-center hover:ring-1 ring-white transition duration-300 gap-2"
             >
               <div className="relative flex  items-center cursor-pointer w-10 ">
                 <ShoppingCart />
@@ -345,7 +373,10 @@ const Navbar = () => {
                 <div className="absolute bg-white top-7 w-96 right-2  rounded-lg">
                   <div className=" flex justify-between p-2 items-center gap-12">
                     <h1 className="text-lg font-semibold">ჩემი კალათა</h1>
-                    <X className="size-6  bg-gray-200 rounded-full p-1 cursor-pointer hover:bg-gray-300 transition duration-300" />
+                    <X
+                      onClick={() => setShowCart(false)}
+                      className="size-6  bg-gray-200 rounded-full p-1 cursor-pointer hover:bg-gray-300 transition duration-300"
+                    />
                   </div>
                   <hr />
                   <div className="flex flex-col gap-2">
@@ -410,22 +441,25 @@ const Navbar = () => {
                               </div>
                             </div>
                             {index !== cart.length - 1 && <hr />}
-                            <div className="p-2 flex mt-2 items-center justify-between">
-                              <p>სულ: {handleTotalPrice()} ₾</p>
-                              <div className="flex gap-1">
-                                <button
-                                  onClick={() => router.push("/cart")}
-                                  className="flex bg-black hover:bg-gray-900 transition duration-300 text-white p-2 justify-center items-center rounded-lg"
-                                >
-                                  ნახვა ({cart.length})
-                                </button>
-                                <button className="flex bg-green-400 hover:bg-green-500 transition duration-300 justify-center p-2 items-center rounded-lg">
-                                  ყიდვა
-                                </button>
-                              </div>
-                            </div>
                           </div>
                         ))}
+                        <div className="p-2 flex mt-2 items-center justify-between">
+                          <p>სულ: {handleTotalPrice()} ₾</p>
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => router.push("/cart")}
+                              className="flex bg-black hover:bg-gray-900 transition duration-300 text-white p-2 justify-center items-center rounded-lg"
+                            >
+                              ნახვა ({cart?.length})
+                            </button>
+                            <button
+                              onClick={() => router.push("/chackout")}
+                              className="flex bg-green-400 hover:bg-green-500 transition duration-300 justify-center p-2 items-center rounded-lg"
+                            >
+                              ყიდვა
+                            </button>
+                          </div>
+                        </div>
                       </>
                     ) : (
                       <h1 className="p-2">შენი კალათა ცარიელია</h1>
@@ -458,6 +492,53 @@ const Navbar = () => {
               </Link>
             )}
             <div className="absolute pointer-events-none inset-0 bg-white/10 w-full h-full translate-x-full opacity-0 group-hover:opacity-100 group-hover:animate-light-move"></div>
+          </div>
+        </div>
+        <div
+          className={`absolute inset-0 ${
+            isSticky ? "pointer-events-auto" : "pointer-events-none"
+          }  top-20 px-4 lg:px-8 xl:px-40`}
+        >
+          <div
+            className={`bg-gray-50 z-30 sticky top-20 items-center text-center overflow-hidden w-full gap-2 transition-all duration-500 ease-in-out ${
+              isSticky
+                ? "opacity-100 flex pointer-events-auto translate-y-0"
+                : "opacity-0 flex pointer-events-none"
+            }`}
+          >
+            <div
+              onClick={() => dispatch(setIsAllCategories(true))}
+              className="bg-black text-white cursor-pointer  flex items-center gap-2 px-2 py-3 rounded-lg"
+            >
+              <p className="w-36">ყველა კატეგორია</p>
+              <TableOfContents />
+            </div>
+            <div
+              className={`relative mb-3 w-full h-full text-center overflow-hidden py-2 px-4 text-white ${
+                isSticky ? "pointer-events-auto" : "pointer-events-none hidden"
+              } `}
+            >
+              <CarouselComp>
+                {categories?.map((item: Category) => (
+                  <div
+                    key={item.id}
+                    onClick={() =>
+                      handleIsAllCategories(`/category/${item.name}`)
+                    }
+                    className={`text-center h-12 max-w-36 ${
+                      isSticky ? "pointer-events-auto" : "pointer-events-none"
+                    }`}
+                  >
+                    <div className="bg-gray-200 flex items-center justify-center  relative cursor-pointer h-full hover:bg-gray-300 rounded-lg">
+                      <h2 className="px-2 text-balance text-sm font-semibold tracking-wider">
+                        {item.name}
+                      </h2>
+                    </div>
+                  </div>
+                ))}
+              </CarouselComp>
+              <div className="absolute bottom-0 w-full shadow-lg  bg-gradient-to-b  from-gray-50 to-transparent  pointer-events-none"></div>
+            </div>
           </div>
         </div>
       </div>
