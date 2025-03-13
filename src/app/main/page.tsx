@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAppSelector } from "@/app/redux";
-import { Category, Product } from "@/app/types/globalStateTypes";
+import { Category, Item, Product } from "@/app/types/globalStateTypes";
 import { Heart, ShoppingCart } from "lucide-react";
 import useAddinWinshilst from "../hooks/addWishlistItem";
 import { useRouter } from "next/navigation";
@@ -9,7 +9,7 @@ import useAddToCartMain from "../hooks/addToCartMain";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import CarouselComp from "../(components)/Carousel/Carousel";
-import { TableOfContents, X } from "lucide-react";
+import { TableOfContents, X, Flame } from "lucide-react";
 
 function Main() {
   const router = useRouter();
@@ -31,15 +31,17 @@ function Main() {
     name: string;
     parentId: number;
   };
+  const [categoryChildrens, setcategoryChildrens] = useState<Item[]>([]);
 
   useEffect(() => {
+    const product = axios.get("/api/products");
+    const categoryResp = axios.get("/api/categories?name=კაცის ტანსაცმელი");
+    const categoryChildren = axios.get("/api/categories?childrens=true");
     async function getProducts() {
-      const resp = await axios.get("/api/products");
-      setProducts(resp.data.products);
-      const categoryResp = await axios.get(
-        "/api/categories?name=კაცის ტანსაცმელი"
-      );
-      setManClothes(categoryResp.data.category);
+      const resp = await Promise.all([product, categoryResp, categoryChildren]);
+      setProducts(resp[0].data.products);
+      setManClothes(resp[1].data.category);
+      setcategoryChildrens(resp[2].data.category);
     }
     getProducts();
   }, []);
@@ -76,6 +78,7 @@ function Main() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
   return (
     <div className="w-full flex flex-col gap-12 mb-20">
       {isAllCategories ? (
@@ -111,7 +114,7 @@ function Main() {
         <>
           <div className="absolute inset-0 pointer-events-none px-4 lg:px-8 xl:px-40">
             <div
-              className={`bg-gray-50 z-30 sticky top-0 items-center text-center overflow-hidden w-full gap-2 transition-all duration-500 ease-in-out ${
+              className={`bg-gray-50 z-30 sticky top-20 items-center text-center overflow-hidden w-full gap-2 transition-all duration-500 ease-in-out ${
                 isSticky
                   ? "opacity-100 flex pointer-events-auto translate-y-0"
                   : "opacity-0 flex pointer-events-none"
@@ -175,7 +178,48 @@ function Main() {
               </CarouselComp>
             </div>
           </div>
-          <img src="/cover1.jpg" alt="image" className="rounded-lg" />
+          <img src="/cover1.jpg" alt="image" className="rounded-3xl" />
+          <div className="relative p-5 bg-orange-400 rounded-3xl">
+            <hr className="h-2 border-dotted" />
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="absolute bg-white w-4/6 h-px top-[31px]" />
+                <p className="text-5xl font-semibold text-white">
+                  მხოლოდ სამი დღით
+                </p>
+                <p className="absolute bg-white w-4/6 h-px bottom-[10px]" />
+              </div>
+              <div className="bg-black text-white flex gap-2 px-2 py-1 text-3xl items-center rounded-full">
+                <Flame className="text-orange-600 size-8 rounded-full bg-orange-400" />{" "}
+                %
+              </div>
+            </div>
+          </div>
+          <CarouselComp SlideToShow={3}>
+            {categoryChildrens?.map((item: Item) => (
+              <div className="px-6" key={item.id}>
+                <div
+                  onClick={() => router.push(`/category/name/${item.name}`)}
+                  className="bg-orange-400 flex flex-col h-40 p-4 rounded-3xl cursor-pointer"
+                >
+                  <div className="bg-orange-500 text-white  rounded-full flex items-center justify-between p-1">
+                    <div className="ml-4">
+                      <p className="text-xl">11-12</p>
+                      <p className="ml-1">მარტი</p>
+                    </div>
+                    <div className="bg-black text-white flex gap-2 px-2 py-1 text-3xl items-center rounded-full">
+                      <Flame className="text-orange-600 size-8 rounded-full bg-orange-400" />
+                      {Math.floor(Math.random() * 100)}%
+                    </div>
+                  </div>
+                  <h1 className="h-full text-sm font-semibold flex items-end">
+                    {item.name}
+                  </h1>
+                </div>
+              </div>
+            ))}
+          </CarouselComp>
+
           <CarouselComp MainTitle="განახლებული კოლექცია">
             {products?.map((product: Product) => {
               const isCart = handleIsCart(product.id);
@@ -185,7 +229,7 @@ function Main() {
                     onClick={() => router.push(`/productId/${product.id}`)}
                     className="rounded-lg hover:bg-gray-100 relative text-center h-full overflow-hidden cursor-pointer max-w-52"
                   >
-                    <div className="absolute inset-0  opacity-0 flex  gap-2 hover:opacity-100 items-center justify-end transition  duration-500 hover:-translate-x-5 ">
+                    <div className="absolute inset-0  opacity-0 flex  gap-2 hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
                       <div className="flex flex-col items-center gap-2 ">
                         <Heart
                           onClick={(e) => {
@@ -226,7 +270,7 @@ function Main() {
                       )}
                       <div className="text-start mt-2">
                         <p className="font-semibold text-sm">
-                          ფასი: {product.price} &#8382;
+                          ფასი: {product.price} ₾
                         </p>
                         <p className="text-sm mt-2">
                           {product.description?.slice(0, 20)}...
@@ -238,6 +282,7 @@ function Main() {
               );
             })}
           </CarouselComp>
+          <img src="/cover3.jpg" alt="image" className="rounded-3xl" />
           <CarouselComp
             Cover={
               <div className="bg-sky-400 rounded-lg py-12">
@@ -298,7 +343,7 @@ function Main() {
                       )}
                       <div className="text-start mt-2">
                         <p className="font-semibold text-sm">
-                          ფასი: {product.price} &#8382;
+                          ფასი: {product.price} ₾;
                         </p>
                         <p className="text-sm mt-2">
                           {product.description?.slice(0, 20)}...

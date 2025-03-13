@@ -62,6 +62,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = req.nextUrl;
     const top = searchParams.get("top") === "true";
+    const childrens = searchParams.get("childrens") === "true";
     const name = searchParams.get("name");
     const name2 = searchParams.get("name2");
 
@@ -78,6 +79,23 @@ export async function GET(req: NextRequest) {
       });
       return NextResponse.json({ categories }, { status: 200 });
     }
+
+    if (childrens) {
+      const category = await prisma.category.findMany({
+        include: {
+          children: true,
+        },
+      });
+
+      if (!category) {
+        return NextResponse.json(
+          { message: "CategoryChildren not found" },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json({ category }, { status: 200 });
+    }
+
     if (name && !name2) {
       const category = await prisma.category.findFirst({
         where: { name: decodeURIComponent(name) },
@@ -150,7 +168,18 @@ export async function GET(req: NextRequest) {
               variants: true,
             },
           },
-          children: true,
+          children: {
+            include: {
+              Product: {
+                include: {
+                  images: true,
+                  Color: true,
+                  Size: true,
+                  variants: true,
+                },
+              },
+            },
+          },
         },
       });
 

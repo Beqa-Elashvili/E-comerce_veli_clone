@@ -11,6 +11,15 @@ export enum OrderStatus {
   CANCELLED = "CANCELLED",
 }
 
+export type Item = {
+  Product: Product[];
+  children: Item[];
+  id: number;
+  imageUrl: string;
+  name: string;
+  parentId: number;
+};
+
 export enum PaymentStatus {
   PENDING = "PENDING",
   SUCCESS = "SUCCESS",

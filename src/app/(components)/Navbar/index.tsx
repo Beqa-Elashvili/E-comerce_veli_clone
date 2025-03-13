@@ -122,7 +122,7 @@ const Navbar = () => {
 
   return (
     <div
-      className={`flex justify-between gap-12 bg-main py-4 px-2 lg:px-8 xl:px-40 items-center w-full mb-7`}
+      className={`flex sticky top-0 z-40 justify-between gap-12 bg-main py-4 px-2 lg:px-8 xl:px-40 items-center w-full mb-7`}
     >
       <div
         ref={searchRef}

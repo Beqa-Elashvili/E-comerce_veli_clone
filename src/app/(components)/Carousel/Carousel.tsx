@@ -7,10 +7,12 @@ function CarouselComp({
   children,
   MainTitle,
   Cover,
+  SlideToShow,
 }: {
   children: React.ReactNode;
   MainTitle?: string;
   Cover?: React.ReactNode;
+  SlideToShow?: number;
 }) {
   const NextArrow = (props: any) => {
     const { onClick } = props;
@@ -46,7 +48,7 @@ function CarouselComp({
           nextArrow={<NextArrow />}
           prevArrow={<PrevArrow />}
           arrows
-          slidesToShow={6}
+          slidesToShow={SlideToShow || 6}
           dots={false}
         >
           {children}
