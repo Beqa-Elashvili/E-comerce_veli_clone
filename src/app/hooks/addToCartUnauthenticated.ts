@@ -24,8 +24,11 @@ export default function addToCartUnauthenticated(
   const currentQuantity = existingCartItem ? existingCartItem.quantity || 0 : 0;
   const totalQuantity = currentQuantity + quantity;
 
-  if (product.VariantStock)
-    if (totalQuantity > product.VariantStock) {
+  if (product.VariantStock || product.stock)
+    if (
+      totalQuantity > product.VariantStock! ||
+      totalQuantity > product.stock
+    ) {
       toast.dismiss();
       toast.error(
         `ხელმისაწვდომია ${

@@ -20,7 +20,6 @@ export default function useAddToCart() {
     cartItem: Product,
     quantity: number
   ) {
-    console.log(cartItem)
     try {
       setLoadingStates((prev) => ({
         ...prev,

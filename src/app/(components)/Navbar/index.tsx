@@ -380,7 +380,7 @@ const Navbar = () => {
                   </div>
                   <hr />
                   <div className="flex flex-col gap-2">
-                    {cart?.length !== 0 ? (
+                    {cart && cart?.length !== 0 ? (
                       <>
                         {cart?.map((item: Product, index: number) => (
                           <div key={item.id}>
