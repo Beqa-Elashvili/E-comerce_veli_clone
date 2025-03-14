@@ -166,6 +166,7 @@ export interface Payment {
 
 export interface ShippingAddress {
   id: number;
+  name: string;
   userId: number;
   address: string;
   city: string;

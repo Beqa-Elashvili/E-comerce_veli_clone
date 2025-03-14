@@ -500,7 +500,7 @@ const Navbar = () => {
           }  top-20 px-4 lg:px-8 xl:px-40`}
         >
           <div
-            className={`bg-gray-50 z-30 sticky top-20 items-center text-center overflow-hidden w-full gap-2 transition-all duration-500 ease-in-out ${
+            className={`bg-gray-50 z-20 sticky top-20 items-center text-center overflow-hidden w-full gap-2 transition-all duration-500 ease-in-out ${
               isSticky
                 ? "opacity-100 flex pointer-events-auto translate-y-0"
                 : "opacity-0 flex pointer-events-none"
