@@ -113,10 +113,15 @@ function Chackout() {
   const getShippingAddress = async () => {
     const resp = await axios.get("/api/shippingaddress");
     setshippingAddress(resp.data);
+    setChosenShipingAddress(resp.data[0]);
   };
+
   useEffect(() => {
     getShippingAddress();
   }, []);
+
+  const [chosenShipingAddress, setChosenShipingAddress] =
+    useState<ShippingAddress | null>();
 
   return (
     <div className="pb-12">
@@ -226,17 +231,41 @@ function Chackout() {
               {!isAddShoppingAddress ? (
                 <>
                   <div className="border hover:text-gray-800 cursor-pointer flex justify-between items-center rounded-lg p-4 w-full">
-                    <div
-                      onClick={() => setisAddShoppingAddress(true)}
-                      className="flex items-center gap-4"
-                    >
-                      <MapPin className="bg-gray-400 p-2 size-12 rounded-lg" />
-                      <div>
-                        <h1 className="font-semibold">მისამართი</h1>
-                        <p className="text-gray-600">დაამატე ახალი მისამართი</p>
-                      </div>
-                    </div>
-                    <h1 className="text-2xl">{">"}</h1>
+                    {!chosenShipingAddress ? (
+                      <>
+                        <div
+                          onClick={() => setisAddShoppingAddress(true)}
+                          className="flex items-center gap-4"
+                        >
+                          <MapPin className="bg-gray-400 p-2 size-12 rounded-lg" />
+                          <div>
+                            <h1 className="font-semibold">მისამართი</h1>
+                            <p className="text-gray-600">
+                              დაამატე ახალი მისამართი
+                            </p>
+                          </div>
+                        </div>
+                        <h1 className="text-2xl">{">"}</h1>
+                      </>
+                    ) : (
+                      <>
+                        <div
+                          onClick={() => setisAddShoppingAddress(true)}
+                          className="flex items-center gap-4"
+                        >
+                          <MapPin className="bg-gray-400 p-2 size-12 rounded-lg" />
+                          <div>
+                            <h1 className="font-semibold">
+                              {chosenShipingAddress.address}
+                            </h1>
+                            <p className="text-gray-600">
+                              {chosenShipingAddress.city}
+                            </p>
+                          </div>
+                        </div>
+                        <h1 className="text-2xl">{">"}</h1>
+                      </>
+                    )}
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
@@ -260,11 +289,17 @@ function Chackout() {
                 </>
               ) : (
                 <>
-                  <h1 className="font-semibold">მისამართის დამატება</h1>
+                  <h1 className="font-semibold">მისამართის დამატება</h1>{" "}
                   {shippingAddress && shippingAddress.length !== 0 && (
                     <Select
                       defaultValue={shippingAddress[0].address || ""}
                       className="border rounded-lg h-16"
+                      onChange={(id: string) => {
+                        const selectedAddress = shippingAddress.find(
+                          (item) => item.id === parseInt(id)
+                        );
+                        setChosenShipingAddress(selectedAddress);
+                      }}
                     >
                       {shippingAddress?.map((item: ShippingAddress) => (
                         <Select.Option key={item.id} value={item.id}>
@@ -337,12 +372,20 @@ function Chackout() {
                       className="max-h-40"
                       placeholder="შეიყვანე დამატებითი ინფორმაცია"
                     />
-                    <Button
-                      className="bg-black mt-12 text-white p-4 w-50 font-semibold rounded-lg hover:bg-gray-900 duration-300 transition"
-                      type="submit"
-                    >
-                      მისამართის დამახსოვრება
-                    </Button>
+                    <div className="flex gap-2 items-center">
+                      <Button
+                        className="bg-black mt-12 text-white p-4 w-50 font-semibold rounded-lg hover:bg-gray-900 duration-300 transition"
+                        type="submit"
+                      >
+                        მისამართის დამახსოვრება
+                      </Button>
+                      <Button
+                        onClick={() => setisAddShoppingAddress(false)}
+                        className="bg-black mt-12 text-white p-4 w-50 font-semibold rounded-lg hover:bg-gray-900 duration-300 transition"
+                      >
+                        გაუქმება
+                      </Button>
+                    </div>
                   </Form>
                 </>
               )}

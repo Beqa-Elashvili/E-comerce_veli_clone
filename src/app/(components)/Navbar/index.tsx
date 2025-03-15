@@ -255,6 +255,8 @@ const Navbar = () => {
     router.push(href);
   };
 
+  const handleIsAuthentificated = user ? "/chackout" : "/authentification";
+
   return (
     <div
       className={`flex sticky top-0 z-40 justify-between gap-12 bg-main py-4 px-2 lg:px-8 xl:px-40 items-center w-full mb-7`}
@@ -453,7 +455,9 @@ const Navbar = () => {
                               ნახვა ({cart?.length})
                             </button>
                             <button
-                              onClick={() => router.push("/chackout")}
+                              onClick={() =>
+                                router.push(handleIsAuthentificated)
+                              }
                               className="flex bg-green-400 hover:bg-green-500 transition duration-300 justify-center p-2 items-center rounded-lg"
                             >
                               ყიდვა
