@@ -6,6 +6,7 @@ interface ButtonProps {
   onSubmit?: () => void;
   className: string;
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -14,9 +15,11 @@ const Button: React.FC<ButtonProps> = ({
   type,
   className,
   onClick,
+  disabled,
 }) => {
   return (
     <button
+      disabled={disabled}
       onSubmit={onSubmit}
       type={type}
       onClick={onClick}

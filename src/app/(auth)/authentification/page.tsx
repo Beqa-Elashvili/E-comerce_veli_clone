@@ -140,8 +140,8 @@ function Register() {
   };
 
   return (
-    <div className=" w-full h-full flex items-center justify-center ">
-      <div className="border bg-white py-12 mx-4 px-4 z-40 mt-12 w-full md:w-2/3 lg:w-1/2 m-auto shadow-custom-light rounded-lg flex flex-col items-center justify-center h-full">
+    <div className=" w-full h-full flex items-center justify-center">
+      <div className="border bg-white py-12 mx-4 px-4 z-30 mt-12 w-full md:w-2/3 lg:w-1/2 m-auto shadow-custom-light rounded-lg flex flex-col items-center justify-center h-full">
         <div className="font-bold   text-md  w-4/6  md:text-2xl flex items-center justify-between gap-8">
           <div
             onClick={() => toggleIsRegisterForm("LOGIN")}

@@ -12,6 +12,7 @@ import { GridLoader } from "react-spinners";
 import useHandleQuantityIncart from "../hooks/useHandleQuantityInCart";
 import useHandleCartquantity from "../hooks/useHandleCartQuantity";
 import useAddToCartMain from "../hooks/addToCartMain";
+import { useRouter } from "next/navigation";
 
 function Cart() {
   const { deleteCartItem } = useDeleteCartItem();
@@ -37,7 +38,7 @@ function Cart() {
       };
       addToCart(user?.id as unknown as string, productWithVariant, 1);
     } else {
-      console.log(product)
+      console.log(product);
       addToCartWithVariants({ ...product, id: product.productId });
     }
   };
@@ -120,6 +121,8 @@ function Cart() {
   useEffect(() => {
     sortCart(sortOption);
   }, [sortOption, cart]);
+
+  const router = useRouter();
 
   return (
     <div className="min-h-screen  h-full pb-12">
@@ -233,7 +236,10 @@ function Cart() {
           <p className="text-green-600 flex gap-2">
             <Car /> უფასო მიწოდება თბილისის მასშტაბით{" "}
           </p>
-          <button className="flex p-4 mt-8 gap-4 bg-sky-400 font-semibold text-lg text-gray-900 tracking-wider hover:shadow-inner items-center justify-center ring-1 rounded-lg">
+          <button
+            onClick={() => router.push("/chackout")}
+            className="flex p-4 mt-8 gap-4 bg-sky-400 font-semibold text-lg text-gray-900 tracking-wider hover:shadow-inner items-center justify-center ring-1 rounded-lg"
+          >
             ყიდვა
           </button>
         </div>
