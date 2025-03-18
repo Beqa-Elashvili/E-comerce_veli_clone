@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import useGetUser from "./actions/getUser";
 import useGetCartItems from "./hooks/getCartItems";
 import useGetWishlistItems from "./hooks/getWislistItems";
+import MobileFooter from "./(components)/mobilefooter";
 import AllCategories from "./(components)/AllCategories/isAllCategories";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
@@ -80,6 +81,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <main className={` ${!isAuth && "px-4 lg:px-8 xl:px-40"} `}>
           {isAllCategories ? <AllCategories /> : <> {children}</>}
         </main>
+        <div className="block z-50 sticky bottom-0 lg:hidden">
+          <MobileFooter />
+        </div>
       </div>
     </div>
   );

@@ -37,6 +37,7 @@ import useAddToCart from "@/app/hooks/addToCart";
 import useHandleQuantityIncart from "@/app/hooks/useHandleQuantityInCart";
 import CarouselComp from "../Carousel/Carousel";
 import { setIsAllCategories } from "@/redux/categorySlice";
+import { setShowResults } from "@/redux/globalSlice";
 
 const Navbar = () => {
   const { status } = useSession();
@@ -62,11 +63,12 @@ const Navbar = () => {
   const [value, setValue] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [showResults, setShowResults] = useState<boolean>(false);
   const [showCart, setShowCart] = useState<boolean>(false);
   const { addToCartWithVariants } = useAddToCartMain();
   const { addToCart, loadingStates, setLoadingStates } = useAddToCart();
   const { deleteCartItem } = useDeleteCartItem();
+
+  const showResults = useAppSelector((state) => state.global.isShowResults);
 
   const cart = useAppSelector(
     (state) => state.global.isCartItemUnauthentificated
@@ -119,7 +121,7 @@ const Navbar = () => {
         searchRef.current &&
         !searchRef.current.contains(event.target as Node)
       ) {
-        setShowResults(false);
+        dispatch(setShowResults(false));
         inputRef.current?.blur();
       }
     };
@@ -149,10 +151,10 @@ const Navbar = () => {
       document.body.style.overflow = "auto";
     };
   }, [cart, showCart]);
-  
+
   useEffect(() => {
     setShowCart(false);
-    setShowResults(false);
+    dispatch(setShowResults(false));
   }, [pathname]);
 
   useEffect(() => {
@@ -272,11 +274,15 @@ const Navbar = () => {
         ref={cartRef}
         className={` ${
           showCart ? "block" : "hidden"
-        } fixed bg-gray-800 inset-0 z-30 h-full bg-opacity-60`}
+        } fixed bg-gray-800 inset-0  z-30 h-full bg-opacity-60`}
       ></div>
       <div className="flex justify-between w-full items-center gap-5">
         <Link href="/" className="flex items-center gap-2">
-          <h1 className="text-5xl font-bold font-serif">VELI</h1>
+          <h1 className="text-5xl font-bold hidden lg:block font-serif">
+            VELI
+          </h1>
+          <h1 className="text-5xl font-bold block lg:hidden font-serif">V</h1>
+
           <div className="flex flex-col gap-1">
             <p className="bg-black h-2 w-2 rounded-full"></p>
             <p className="bg-black h-2 w-2 rounded-full"></p>
@@ -285,7 +291,7 @@ const Navbar = () => {
         <div className="relative z-30 w-full">
           <input
             ref={inputRef}
-            onFocus={() => setShowResults(true)}
+            onFocus={() => dispatch(setShowResults(true))}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             type="search"
@@ -297,7 +303,7 @@ const Navbar = () => {
             ref={searchRef}
             className={`${
               showResults ? "absolute" : "hidden"
-            }   bg-white top-16 w-full flex max-h-96 overflow-x-auto flex-col   transition duration-300 rounded-lg p-4   scrollbar-thin scrollbar-thumb-sky-500 scrollbar-track-sky-100 snap-x snap-mandatory scroll-smooth`}
+            }   bg-white top-16 w-full flex  lg:max-h-96 overflow-x-auto flex-col   transition duration-300 rounded-lg p-4   scrollbar-thin scrollbar-thumb-sky-500 scrollbar-track-sky-100 snap-x snap-mandatory scroll-smooth`}
           >
             {loading ? (
               <div className="flex items-center justify-center">
@@ -306,7 +312,7 @@ const Navbar = () => {
             ) : (
               <>
                 {value.length !== 0 && searchResults.length === 0 && (
-                  <div className="flex items-center justify-between ">
+                  <div className="flex text-sm lg:text-sm items-center justify-between ">
                     პროდუქტი ვერ მოიძებნა ! <SearchX />
                   </div>
                 )}
@@ -314,7 +320,7 @@ const Navbar = () => {
             )}
 
             {value.length === 0 && searchResults.length === 0 && (
-              <div className="flex items-center justify-between">
+              <div className="flex items-center text-sm lg:text-lg justify-between">
                 გთხოვთ შეიყვანოთ საძიებო სიტყვა <Search />
               </div>
             )}
@@ -324,7 +330,7 @@ const Navbar = () => {
                   className="cursor-pointer py-2 hover:text-gray-700"
                   key={item.id}
                 >
-                  <div className="flex gap-2">
+                  <div className="block lg:flex  gap-2">
                     <h1 className="text-sm">{item.name}</h1>
                     <h1 className="text-sm">{item.description}</h1>
                   </div>
@@ -500,7 +506,7 @@ const Navbar = () => {
           </div>
         </div>
         <div
-          className={`absolute inset-0 ${
+          className={`absolute hidden lg:block inset-0 ${
             isSticky ? "pointer-events-auto" : "pointer-events-none"
           }  top-20 px-4 lg:px-8 xl:px-40`}
         >

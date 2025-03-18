@@ -125,8 +125,8 @@ function Cart() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen  h-full pb-12">
-      <div className="flex gap-2 h-full relative items-start">
+    <div className="min-h-screen lg:h-full pb-12">
+      <div className="block lg:flex gap-2 h-full relative items-start">
         <div className="flex flex-col gap-4 ring-1 bg-gray-100 h-full min-h-1/2  w-full p-4 rounded-lg">
           <h1 className="text-3xl font-bold text-sky-700 tracking-wider">
             თქვენი კალათა
@@ -161,7 +161,7 @@ function Cart() {
                     className="w-24 h-24 object-contaion"
                     alt="image"
                   />
-                  <div className="flex justify-between w-full gap-2">
+                  <div className="block lg:flex justify-between w-full gap-2">
                     <div>
                       <h1 className="text-xl ">{item.name}</h1>
                       <p className="text-sm">{item.description}</p>
@@ -182,7 +182,7 @@ function Cart() {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center justify-center gap-4">
+                    <div className="flex items-center justify-start my-2 lg:my-0 lg:justify-center gap-4">
                       <div
                         onClick={() => handleAddToCart(item)}
                         className="h-8 w-8 cursor-pointer hover:bg-gray-200 rounded-full border flex items-center justify-center"
@@ -223,7 +223,7 @@ function Cart() {
             ))}
           </div>
         </div>
-        <div className="ring-1 sticky top-7  flex flex-col gap-5 w-1/2 rounded-lg p-6">
+        <div className="ring-1 sticky top-7 mt-2 lg:mt-0  flex flex-col gap-5 w-full lg:w-1/2 rounded-lg p-6">
           <h1 className="text-2xl font-bold">შეკვეთა</h1>
           <div className="flex justify-between">
             <p className="text-sm">პროდუქტები</p>

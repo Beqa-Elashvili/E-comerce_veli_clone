@@ -11,7 +11,7 @@ function AllCategories() {
   const dipatch = useAppDispatch();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 mb-12 md:mb-0 min-h-screen">
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-semibold h-full">ყველა კატეგორია</h1>
         <div
@@ -21,7 +21,7 @@ function AllCategories() {
           <X className="size-5" />
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-4 justify-between h-full w-full">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 justify-between h-full w-full">
         {categories?.map((item: Category) => (
           <div
             key={item.id}
@@ -34,11 +34,11 @@ function AllCategories() {
             }}
           >
             <div className="bg-gray-200 relative cursor-pointer h-full hover:bg-gray-300 overflow-hidden rounded-lg">
-              <h2 className="px-2 flex items-center text-balance py-8  tracking-wider">
+              <h2 className="px-2  flex items-center text-balance py-8  tracking-wider">
                 {item.name}
               </h2>
               <img
-                className="h-40 object-contain absolute -right-14 -bottom-16"
+                className="h-20 md:h-40 object-contain absolute -right-4 md:-right-14 -bottom-5 md:-bottom-16"
                 src={item.imageUrl}
                 alt="image"
               />

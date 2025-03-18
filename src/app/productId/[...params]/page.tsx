@@ -220,7 +220,7 @@ function ProductId({ params }: ProductIdProps) {
 
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center w-full py-8">
+      <div className="block md:flex justify-between items-center w-full py-8">
         <h1>ID: {product.id}</h1>
         <div
           onClick={() =>
@@ -229,7 +229,7 @@ function ProductId({ params }: ProductIdProps) {
               product.id as unknown as string
             )
           }
-          className="ring-1 hover:ring-2 transition hover:text-sky-800 cursor-pointer duration-300 flex p-2 rounded-lg justify-between gap-2 ring-sky-700"
+          className="ring-1 mt-2 md:mt-0 hover:ring-2 transition hover:text-sky-800 cursor-pointer duration-300 flex p-2 rounded-lg justify-between gap-2 ring-sky-700"
         >
           <Heart
             className={`${
@@ -243,10 +243,10 @@ function ProductId({ params }: ProductIdProps) {
           </p>
         </div>
       </div>
-      <div className="flex justify-between gap-12">
-        <div className="flex w-full gap-10">
-          <div className="flex items-start w-full">
-            <div className="flex flex-col w-full min-w-14 gap-4">
+      <div className="md:flex justify-between gap-12">
+        <div className="block md:flex w-full gap-10">
+          <div className="block md:flex items-start w-full">
+            <div className="flex md:flex-col w-full min-w-14 gap-4">
               {product?.images.map((item) => (
                 <img
                   className={`h-14 w-14 object-contain ${
@@ -332,9 +332,9 @@ function ProductId({ params }: ProductIdProps) {
                 <div className="flex gap-2">
                   {variantDetails.map((item, index) => (
                     <div key={index}>
-                      <div className="ring-1 p-2 min-w-20 inline-flex items-center justify-center rounded-lg gap-2">
-                        <div>{item.colorName}</div>
-                        <div>{item.sizeName}</div>
+                      <div className="ring-1 p-2 min-w-20 inline-flex items-center justify-center rounded-lg md:gap-2">
+                        {item.colorName && <div>{item.colorName}</div>}
+                        {item.sizeName && <div>{item.sizeName}</div>}
                       </div>
                     </div>
                   ))}
@@ -343,7 +343,7 @@ function ProductId({ params }: ProductIdProps) {
             )}
           </div>
         </div>
-        <div className="ring-1 p-4 rounded-lg flex flex-col gap-2 min-w-80">
+        <div className="my-4 md:my-0 ring-1 p-4 rounded-lg flex flex-col gap-2 min-w-80">
           <h1 className="flex gap-2 font-semibold text-xl">
             {product.price} <span>₾</span>
           </h1>

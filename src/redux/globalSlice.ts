@@ -4,6 +4,7 @@ import { Product } from "@/app/types/globalStateTypes";
 export interface initialStateTypes {
   isSideBarCollapsed: boolean;
   isDarkMode: boolean;
+  isShowResults: boolean;
   isRegisterForm: boolean;
   isCartItemUnauthentificated: Product[] | null;
   isProducts: Product[] | null;
@@ -13,6 +14,7 @@ export interface initialStateTypes {
 const initialState: initialStateTypes = {
   isSideBarCollapsed: true,
   isProducts: null,
+  isShowResults: false,
   isDarkMode: false,
   isRegisterForm: false,
   isCartItemUnauthentificated: null,
@@ -32,6 +34,9 @@ const globalSlice = createSlice({
     setIsProducts: (state, action: PayloadAction<Product[] | null>) => {
       state.isProducts = action.payload;
     },
+    setShowResults: (state, action: PayloadAction<boolean>) => {
+      state.isShowResults = action.payload;
+    },
     setIsWishlist: (state, action: PayloadAction<Product[] | null>) => {
       state.isWishlist = action.payload;
     },
@@ -50,6 +55,7 @@ const globalSlice = createSlice({
 export const {
   setIsSideBarCollapsed,
   setISDarkMode,
+  setShowResults,
   setIsRegisterForm,
   setIsCartItemUnauthentificated,
   setIsProducts,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Carousel } from "antd";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { DotDuration } from "antd/es/carousel/style";
@@ -14,12 +14,14 @@ function CarouselComp({
   Cover?: React.ReactNode;
   SlideToShow?: number;
 }) {
+  const [slidesToShow, setSlidesToShow] = useState<number>(6); // Default slidesToShow
+  const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
   const NextArrow = (props: any) => {
     const { onClick } = props;
     return (
       <div
         onClick={onClick}
-        className="absolute bg-white cursor-pointer shadow-custom-light p-2 rounded-full right-0 top-1/2 transform -translate-y-1/2 z-20"
+        className="absolute hidden md:block bg-white cursor-pointer shadow-custom-light p-2 rounded-full right-0 top-1/2 transform -translate-y-1/2 z-20"
       >
         <ChevronRight className="hover:scale-150 transition duration-300" />
       </div>
@@ -30,12 +32,38 @@ function CarouselComp({
     return (
       <div
         onClick={onClick}
-        className="absolute cursor-pointer shadow-custom-light p-2 bg-white rounded-full left-0 top-1/2 transform -translate-y-1/2 z-20"
+        className="absolute hidden md:block cursor-pointer shadow-custom-light p-2 bg-white rounded-full left-0 top-1/2 transform -translate-y-1/2 z-20"
       >
         <ChevronLeft className="hover:scale-150 transition duration-300" />
       </div>
     );
   };
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    // Add event listener to resize
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup the event listener
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (windowWidth >= 1200) {
+      setSlidesToShow(6); // Large screens
+    } else if (windowWidth >= 992) {
+      setSlidesToShow(5); // Medium screens
+    } else if (windowWidth >= 768) {
+      setSlidesToShow(5); // Small screens
+    } else {
+      setSlidesToShow(3); // Mobile screens
+    }
+  }, [windowWidth]);
+
   return (
     <div>
       <h1 className="text-2xl font-bold tracking-wider mb-4">{MainTitle}</h1>
@@ -48,12 +76,12 @@ function CarouselComp({
           nextArrow={<NextArrow />}
           prevArrow={<PrevArrow />}
           arrows
-          slidesToShow={SlideToShow || 6}
+          slidesToShow={SlideToShow ? SlideToShow : slidesToShow}
           dots={false}
         >
           {children}
         </Carousel>
-        <div className="absolute pointer-events-none inset-0 z-10">
+        <div className="absolute hidden md:block pointer-events-none inset-0 z-10">
           <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r  from-gray-50 to-transparent  pointer-events-none" />
           <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none" />
         </div>
