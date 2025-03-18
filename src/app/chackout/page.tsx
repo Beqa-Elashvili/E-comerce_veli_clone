@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 import { useAppSelector } from "../redux";
 import { Form, Input, Checkbox, Select } from "antd";
@@ -17,6 +17,8 @@ import {
   X,
   ChevronDown,
   ChevronUp,
+  ShieldCheck,
+  Check,
 } from "lucide-react";
 import axios from "axios";
 import { Product, ShippingAddress } from "../types/globalStateTypes";
@@ -184,6 +186,86 @@ function Chackout() {
 
   const [isSale, setIsSale] = useState<boolean>(false);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isModalOpen]);
+
+  const handleClickOutside = (e: any) => {
+    if (modalRef.current && !modalRef.current.contains(e.target)) {
+      closeModal();
+    }
+  };
+  useEffect(() => {
+    if (isModalOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isModalOpen]);
+
+  const [success, setSuccess] = useState<boolean>(false);
+
+  const handleModalSubmit: SubmitHandler<FieldValues> = async (data) => {
+    try {
+      const resp = await axios.post("/api/orders", {
+        userId: user?.id,
+        cartItems: cart,
+        shippingAddress: chosenShipingAddress,
+      });
+      const response = await axios.post("/api/payments", {
+        orderId: resp.data.order.id,
+        paymentMethod: "CREDIT_CARD",
+        userId: user?.id,
+      });
+      setSuccess(true);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      const timeOut = setTimeout(() => {
+        setSuccess(false);
+      }, 1000);
+      router.push("/");
+      return () => clearTimeout(timeOut);
+    }
+  };
+
+  const [value, setValue] = useState("");
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let inputValue = e.target.value;
+
+    inputValue = inputValue.replace(/\D/g, "");
+
+    if (inputValue.length >= 3) {
+      inputValue = inputValue.slice(0, 2) + "/" + inputValue.slice(2, 4);
+    }
+
+    if (inputValue.length > 5) {
+      inputValue = inputValue.slice(0, 5);
+    }
+
+    setValue(inputValue);
+  };
+
   return (
     <div className="pb-12">
       <div className="flex items-center text-gray-800 text-sm gap-2">
@@ -200,7 +282,9 @@ function Chackout() {
           onClick={() => {
             setisAddShoppingAddress(true), setIsInfo(false), setToFinish(false);
           }}
-          className={`${!isInfo && !toFinish && "text-black font-semibold"} cursor-pointer`}
+          className={`${
+            !isInfo && !toFinish && "text-black font-semibold"
+          } cursor-pointer`}
         >
           მიტანა
         </p>
@@ -676,9 +760,123 @@ function Chackout() {
                   </div>
                 )}
               </div>
-              <Button className="bg-green-300 text-black p-4 font-semibold rounded-lg hover:bg-green-400 duration-300 transition">
+              <Button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-green-300 text-black p-4 font-semibold rounded-lg hover:bg-green-400 duration-300 transition"
+              >
                 გადახდა
               </Button>
+              <div>
+                {isModalOpen && (
+                  <>
+                    <div
+                      onClick={closeModal}
+                      className="fixed inset-0 bg-black opacity-50 z-40"
+                    ></div>
+                    <div className="fixed inset-0 flex items-center justify-center z-50">
+                      <div
+                        ref={modalRef}
+                        className="bg-white flex flex-col gap-4 p-4 w-2/5 rounded-lg shadow-lg"
+                      >
+                        <div className="flex justify-between">
+                          <h2 className="text-xl font-semibold">გადახდა</h2>
+                          <X
+                            onClick={closeModal}
+                            className="size-5 cursor-pointer"
+                          />
+                        </div>
+                        <div className="border p-2 w-full flex rounded-lg justify-between">
+                          <p className="text-gray-500">თანხა:</p>
+                          <p>{handleTotalPrice()} GEL</p>
+                        </div>
+                        <div className="border p-2 w-full rounded-lg">
+                          <h1 className="py-4">გადაიხადე ბარათით</h1>
+                          <Form onFinish={handleModalSubmit}>
+                            <Form.Item name="cardNumber">
+                              <div className="relative w-full">
+                                <Input
+                                  name="cardNumber"
+                                  className="peer font-semibold rounded-lg pt-5 outline-none bg-gray-50 hover:bg-gray-50 focus:outline-none placeholder-transparent w-full"
+                                  required
+                                  maxLength={16}
+                                  type="number"
+                                />
+                                <label className="absolute pointer-events-none left-3 top-1 text-gray-500  text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400">
+                                  ბარათის ნომერი
+                                </label>
+                              </div>
+                            </Form.Item>
+                            <div className="flex w-full gap-4">
+                              <Form.Item name="validity" className="w-full">
+                                <div className="relative w-full">
+                                  <Input
+                                    value={value}
+                                    onChange={handleChange}
+                                    name="validity"
+                                    maxLength={5}
+                                    className="peer font-semibold rounded-lg pt-5 outline-none bg-gray-50 hover:bg-gray-50 focus:outline-none placeholder-transparent w-full"
+                                    required
+                                    type="text"
+                                  />
+                                  <label className="absolute pointer-events-none left-3 top-1 text-gray-500  text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400">
+                                    მოქმედების ვადა
+                                  </label>
+                                </div>
+                              </Form.Item>
+                              <Form.Item name="CVC" className="w-full">
+                                <div className="relative w-full">
+                                  <Input
+                                    name="CVC"
+                                    className="peer font-semibold rounded-lg pt-5 outline-none bg-gray-50 hover:bg-gray-50 focus:outline-none placeholder-transparent w-full"
+                                    required
+                                    maxLength={3}
+                                    type="number"
+                                  />
+                                  <label className="absolute pointer-events-none left-3 top-1 text-gray-500  text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400">
+                                    CVC / CVV
+                                  </label>
+                                </div>
+                              </Form.Item>
+                            </div>
+                            {success && (
+                              <div className="flex items-center justify-center gap-2">
+                                <Check className="w-8 bg-green-500 h-8 p-1 rounded-full" />
+                                <p className="font-semibold text-lg">
+                                  გადახდა წარმატებით შესრულდა
+                                </p>
+                              </div>
+                            )}
+
+                            <Button
+                              type="submit"
+                              className="bg-black mt-4 text-white w-full p-4 font-semibold rounded-lg  duration-300 transition"
+                            >
+                              გადახდა
+                            </Button>
+                          </Form>
+                        </div>
+                        <hr />
+                        <div>
+                          <div className="flex justify-center items-center gap-8">
+                            <img src="DCC.png" alt="icon" />
+                            <img src="visa.png" alt="icon" />
+                            <img src="mastercard.png" alt="icon" />
+                          </div>
+                          <div className="flex justify-center mt-4 items-center gap-2">
+                            <ShieldCheck className="fill-green-500 text-green-400" />{" "}
+                            <p className="flex text-gray-600 text-sm gap-2">
+                              ვერიფიცირებულია{" "}
+                              <span className="font-semibold text-black">
+                                თიბისი ბანკისაგან
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
               <Button
                 onClick={() => setIsSale(!isSale)}
                 className="relative bg-gray-300 flex  justify-center items-center gap-2  text-black p-4 font-semibold rounded-lg hover:bg-gray-400 duration-300 transition"

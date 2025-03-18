@@ -149,6 +149,7 @@ const Navbar = () => {
       document.body.style.overflow = "auto";
     };
   }, [cart, showCart]);
+  
   useEffect(() => {
     setShowCart(false);
     setShowResults(false);
