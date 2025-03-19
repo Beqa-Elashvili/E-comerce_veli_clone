@@ -99,6 +99,8 @@ function Register() {
                   selectedColor: item.selectedColor,
                   selectedSize: item.selectedSize,
                 }));
+                toast.success("Logged in!");
+                router.push("/");
                 await axios.post("/api/cart", {
                   userId: user.id,
                   product,
@@ -108,8 +110,6 @@ function Register() {
                 console.log("პროდუქტები დაემატა კალათაში");
               }
             }
-            toast.success("Logged in!");
-            router.push("/");
           }
         });
       }

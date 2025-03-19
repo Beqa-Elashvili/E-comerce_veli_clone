@@ -1,10 +1,18 @@
 "use client";
 import { useAppSelector } from "@/app/redux";
 import React, { use, useEffect, useState } from "react";
-import { UserRound, Package, Heart, MapPin, LogOut } from "lucide-react";
+import {
+  UserRound,
+  Package,
+  Heart,
+  MapPin,
+  LogOut,
+  Settings,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import axios from "axios";
+import useGetWishlistItems from "@/app/hooks/getWislistItems";
 import { Order, Product, ShippingAddress } from "@/app/types/globalStateTypes";
 
 type ProfileProps = {
@@ -18,30 +26,35 @@ function page({ params }: ProfileProps) {
   const { params: routeParams } = use(params);
   const [name] = routeParams || [];
   const [shippingAddress, setSippingAddress] = useState<ShippingAddress[]>([]);
-  const [wishlist, setWishlist] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const { getWishlistItems } = useGetWishlistItems();
+  const wishlist = useAppSelector((state) => state.global.isWishlist);
 
   const handleParams = async (par: string) => {
     if (par === "addresses") {
       const resp = await axios.get("/api/shippingaddress");
       setSippingAddress(resp.data);
-    }
-    if (par === "wishlist") {
-      const resp = await axios.get("/api/wishlist");
-      setWishlist(resp.data.wishlistProducts);
     } else if (par === "orders") {
-      try {
-        const resp = await axios.get("/api/orders");
-        console.log(resp);
-        setOrders(resp.data.orders);
-      } catch (error) {
-        console.log(error);
-      }
+      const resp = await axios.get("/api/orders");
+      setOrders(resp.data.orders);
     }
   };
   useEffect(() => {
     handleParams(name);
   }, [name]);
+
+  const deleteWishlistItem = async (id: number) => {
+    try {
+      await axios.delete("/api/wishlist", {
+        data: {
+          productId: id,
+        },
+      });
+      await getWishlistItems();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const handleName = () => {
     if (name === "addresses") {
@@ -67,7 +80,10 @@ function page({ params }: ProfileProps) {
               ))}
             </div>
           ) : (
-            <>ცარიელია</>
+            <div className="flex items-center flex-col gap-6 justify-center">
+              <MapPin className="size-18" />
+              <p className="text-xl font-semibold">მისამართების სია ცარიელია</p>
+            </div>
           )}
         </>
       );
@@ -103,7 +119,10 @@ function page({ params }: ProfileProps) {
                         </button>
                       </div>
                     </div>
-                    <h1 className="text-2xl">
+                    <h1
+                      onClick={() => deleteWishlistItem(item.id)}
+                      className="text-2xl"
+                    >
                       <Heart className="fill-red-500 text-red-500" />
                     </h1>
                   </div>
@@ -112,7 +131,17 @@ function page({ params }: ProfileProps) {
               ))}
             </div>
           ) : (
-            <>ცარიელია</>
+            <div className="flex items-center flex-col gap-6 justify-center">
+              <h1 className="text-2xl font-semibold">სურვილები</h1>
+              <p className="text-xl font-semibold">სურვილების სია ცარიელია</p>
+              <p className="text-sm  items-center gap-2  text-center justify-center">
+                <Heart className="text-center w-full" />
+                დააჭირე ნიშანს სასურველ პროდუქტზე და შეინახე სურვილების სიაში.
+              </p>
+              <button onClick={() => router.push("/")} className="bg-black text-white font-semibold rounded-lg p-4 ">
+                დაამატე პროდუტები
+              </button>
+            </div>
           )}
         </div>
       );
@@ -150,19 +179,42 @@ function page({ params }: ProfileProps) {
         </div>
       );
     }
+    if (name === "settings") {
+      return (
+        <>
+          <h1 className="text-2xl font-semibold">პარამეტრები</h1>
+          <div className="flex mt-6 flex-col font-semibold gap-6">
+            <div className="space-y-2">
+              <p>მეილი</p>
+              <p>{user?.email}</p>
+            </div>
+            <hr />
+            <div className="space-y-2">
+              <p>სახელი, გვარი</p>
+              <p>{user?.name}</p>
+            </div>
+            <hr />
+            <div className="space-y-2">
+              <p>მობილურის ნომერი</p>
+              <p>{user?.phoneNumber}</p>
+            </div>
+          </div>
+        </>
+      );
+    }
   };
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-6">
       <h1 className="text-2xl flex gap-2 items-center font-semibold">
         <UserRound className="size-10 bg-gray-200 p-2 rounded-full" />
         გამარჯობა, {user?.name?.toUpperCase()}
       </h1>
       <hr className="my-4" />
-      <div className="flex gap-12">
+      <div className="md:flex gap-12">
         <div className="flex flex-col gap-2">
           <div
             onClick={() => router.push("/profile/orders")}
-            className={`flex text-lg w-full mr-12 items-center gap-6 p-4 rounded-xl ${
+            className={`flex  cursor-pointer text-lg w-full mr-12 items-center gap-6 p-4 rounded-xl ${
               name === "orders" && "bg-gray-100 text-gray-500"
             } `}
           >
@@ -172,7 +224,7 @@ function page({ params }: ProfileProps) {
           <hr />
           <div
             onClick={() => router.push("/profile/wishlist")}
-            className={`flex text-lg w-full mr-12 items-center gap-6 p-4 rounded-xl ${
+            className={`flex cursor-pointer text-lg w-full mr-12 items-center gap-6 p-4 rounded-xl ${
               name === "wishlist" && "bg-gray-100 text-gray-500"
             } `}
           >
@@ -182,7 +234,7 @@ function page({ params }: ProfileProps) {
           <hr />
           <div
             onClick={() => router.push("/profile/addresses")}
-            className={`flex text-lg w-full mr-12 items-center gap-6 p-4 rounded-xl ${
+            className={`flex cursor-pointer text-lg w-full mr-12 items-center gap-6 p-4 rounded-xl ${
               name === "addresses" && "bg-gray-100 text-gray-500"
             } `}
           >
@@ -191,15 +243,27 @@ function page({ params }: ProfileProps) {
           </div>
           <hr />
           <div
-            onClick={() => signOut()}
-            className="flex text-lg w-full mr-12 items-center gap-6 p-4 rounded-xl"
+            onClick={() => router.push("/profile/settings")}
+            className={`flex cursor-pointer text-lg w-full mr-12 items-center gap-6 p-4 rounded-xl ${
+              name === "settings" && "bg-gray-100 text-gray-500"
+            } `}
+          >
+            <Settings />
+            <p>პარამეტრები</p>
+          </div>
+          <hr />
+          <div
+            onClick={() => {
+              signOut(), router.push("/");
+            }}
+            className="flex text-lg cursor-pointer w-full mr-12 items-center gap-6 p-4 rounded-xl"
           >
             <LogOut />
             <p>გამოსვლა</p>
           </div>
           <hr />
         </div>
-        <div className="w-full">{handleName()}</div>
+        <div className="w-full mt-6 md:mt-0">{handleName()}</div>
       </div>
     </div>
   );

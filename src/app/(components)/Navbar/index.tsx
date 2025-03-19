@@ -11,6 +11,7 @@ import {
   X,
   Trash,
   TableOfContents,
+  Settings,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -38,6 +39,7 @@ import useHandleQuantityIncart from "@/app/hooks/useHandleQuantityInCart";
 import CarouselComp from "../Carousel/Carousel";
 import { setIsAllCategories } from "@/redux/categorySlice";
 import { setShowResults } from "@/redux/globalSlice";
+import { Package, MapPin } from "lucide-react";
 
 const Navbar = () => {
   const { status } = useSession();
@@ -95,6 +97,8 @@ const Navbar = () => {
   const searchRef = useRef<HTMLDivElement>(null);
   const cartRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const userRef = useRef<HTMLInputElement>(null);
+  const [showUser, setShowUser] = useState<boolean>(false);
 
   useEffect(() => {
     setLoading(true);
@@ -153,6 +157,26 @@ const Navbar = () => {
   }, [cart, showCart]);
 
   useEffect(() => {
+    if (showUser) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userRef.current && !userRef.current.contains(event.target as Node)) {
+        setShowUser(false);
+        userRef.current?.blur();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "auto";
+    };
+  }, [showUser]);
+
+  useEffect(() => {
     setShowCart(false);
     dispatch(setShowResults(false));
   }, [pathname]);
@@ -160,6 +184,7 @@ const Navbar = () => {
   useEffect(() => {
     setValue("");
     setSearchResults([]);
+    setShowUser(false);
   }, [pathname]);
 
   const handleAddToCart = async (product: Product) => {
@@ -276,6 +301,12 @@ const Navbar = () => {
           showCart ? "block" : "hidden"
         } fixed bg-gray-800 inset-0  z-30 h-full bg-opacity-60`}
       ></div>
+      <div
+        ref={userRef}
+        className={` ${
+          showUser ? "block" : "hidden"
+        } fixed bg-gray-800 inset-0  z-30 h-full bg-opacity-60`}
+      ></div>
       <div className="flex justify-between w-full items-center gap-5">
         <Link href="/" className="flex items-center gap-2">
           <h1 className="text-5xl font-bold hidden lg:block font-serif">
@@ -352,15 +383,6 @@ const Navbar = () => {
               )}
             </button>
           </div>
-
-          <Link href="/wishlist" className="lex items-center">
-            <Heart
-              className={` text-red-600 inline ${
-                wishlist && wishlist?.length !== 0 && "fill-red-600"
-              } `}
-              size={26}
-            />
-          </Link>
           <hr className="w-0 h-7 border border-solid border-gray-300 mx-2" />
           <div className="relative">
             <div
@@ -484,14 +506,20 @@ const Navbar = () => {
             )}
           </div>
           <hr className="w-0 h-7 border border-solid border-gray-300 mx-3" />
-          <div className="relative flex h-[40px]  hover:ring-1 p-2 ring-white transition duration-300 items-center  gap-2 font-semibold cursor-pointer rounded-md overflow-hidden group">
+          <div className="relative flex h-[40px] z-10  w-36 justify-center hover:ring-1 p-2 ring-white transition duration-300 overflow-hidden items-center  gap-2 font-semibold cursor-pointer rounded-md group">
             {status === "authenticated" ? (
-              <button className="flex gap-4" onClick={SignOut}>
-                <UserRound />
-                <LogOut />
-              </button>
+              <>
+                <div
+                  ref={userRef}
+                  onClick={() => setShowUser((prev) => !prev)}
+                  className="flex gap-4 z-40"
+                >
+                  <UserRound />
+                  <p>ჩემი ველი</p>
+                </div>
+              </>
             ) : (
-              <Link href="/authentification">
+              <div onClick={() => router.push("/authentification")}>
                 {status === "loading" ? (
                   <DotLoader color="#3032ae" size={12} className="w-12" />
                 ) : (
@@ -500,10 +528,67 @@ const Navbar = () => {
                     <p className="font-semibold">შესვლა</p>
                   </div>
                 )}
-              </Link>
+              </div>
             )}
             <div className="absolute pointer-events-none inset-0 bg-white/10 w-full h-full translate-x-full opacity-0 group-hover:opacity-100 group-hover:animate-light-move"></div>
           </div>
+          {showUser && (
+            <div ref={userRef} className="relative z-30">
+              <div className="absolute bg-white w-96 right-10 p-4 pb-5 top-12  rounded-lg">
+                <div className="flex justify-between items-center gap-12">
+                  <h1 className="text-lg font-semibold">
+                    გამარჯობა, {user?.name}
+                  </h1>
+                  <X
+                    onClick={() => setShowCart(false)}
+                    className="size-6  bg-gray-200 rounded-full p-1 cursor-pointer hover:bg-gray-300 transition duration-300"
+                  />
+                </div>
+                <hr className="my-6" />
+                <div className="grid grid-cols-2 grid-rows-3 gap-y-8 items-center gap-4">
+                  <div
+                    onClick={() => router.push("/profile/orders")}
+                    className="flex items-center gap-4 cursor-pointer"
+                  >
+                    <Package />
+                    <p>შეკვეთები</p>
+                  </div>
+                  <div
+                    onClick={() => router.push("/profile/addresses")}
+                    className="flex cursor-pointer items-center gap-4"
+                  >
+                    <MapPin />
+                    <p>მისამართები</p>
+                  </div>
+                  <div
+                    onClick={() => router.push("/profile/wishlist")}
+                    className="flex cursor-pointer items-center gap-4"
+                  >
+                    <Heart />
+                    <p>სურვილები</p>
+                  </div>
+                  <div
+                    onClick={() => router.push("/profile/settings")}
+                    className="flex cursor-pointer items-center gap-4"
+                  >
+                    <Settings />
+                    <p>პარამეტრები</p>
+                  </div>
+                </div>
+                <hr />
+                <button
+                  onClick={() => signOut()}
+                  className="flex mt-4 items-center gap-4"
+                >
+                  <LogOut />
+                  <p>გამოსვლა</p>
+                </button>
+              </div>
+              <span className="text-black absolute z-30 right-16  top-10 ">
+                <Triangle className="text-white size-4 fill-white" />
+              </span>
+            </div>
+          )}
         </div>
         <div
           className={`absolute hidden lg:block inset-0 ${

@@ -304,11 +304,11 @@ function Chackout() {
           </div>
         )}
       </div>
-      <div className="flex items-center gap-12">
+      <div className="md:flex items-center gap-12">
         {toFinish ? (
           <div className="flex flex-col w-full gap-4">
-            <div className="border flex flex-col self-start rounded-xl w-full mt-12 p-4">
-              <div className="flex justify-evenly">
+            <div className="border flex justify-between md:flex-col md:self-start rounded-xl w-full mt-12 p-4">
+              <div className=" md:flex  justify-evenly space-y-4 md:space-y-0">
                 <div className="flex items-center gap-1">
                   <UserRound />
                   <h1 className="font-semibold text-xl">მიმღები</h1>
@@ -322,8 +322,8 @@ function Chackout() {
                   <h1 className="font-semibold text-xl">მიწოდება</h1>
                 </div>
               </div>
-              <hr className="my-4" />
-              <div className="flex  text-sm text-gray-400 justify-evenly">
+              <hr className="my-4 hidden md:block" />
+              <div className="space-y-7 md:space-y-0 md:flex text-sm text-gray-400 justify-evenly">
                 <p>
                   {user?.name}, {user?.phoneNumber}
                 </p>
@@ -535,7 +535,7 @@ function Chackout() {
                             <h1 className="font-semibold text-2xl">
                               აირჩიე მიტანის დრო
                             </h1>
-                            <div className="my-4 grid grid-cols-3 gap-4">
+                            <div className="my-4 grid md:grid-cols-3 gap-4">
                               {shippingTime.map((item) => (
                                 <div
                                   key={item.time}
@@ -704,7 +704,7 @@ function Chackout() {
           </>
         )}
 
-        <div className="border mt-12 rounded-xl p-4 flex flex-col self-start gap-4 w-3/6">
+        <div className="border mt-12 rounded-xl p-4 flex flex-col self-start gap-4 w-full md:w-3/6">
           <h1 className="text-2xl font-semibold">კალათა</h1>
           <div className="flex flex-col gap-4 text-sm">
             <div className="flex justify-between items-center">
@@ -773,10 +773,10 @@ function Chackout() {
                       onClick={closeModal}
                       className="fixed inset-0 bg-black opacity-50 z-40"
                     ></div>
-                    <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 flex items-center px-2 md:px-0 justify-center z-50">
                       <div
                         ref={modalRef}
-                        className="bg-white flex flex-col gap-4 p-4 w-2/5 rounded-lg shadow-lg"
+                        className="bg-white flex flex-col gap-4 p-4 md:w-2/5 rounded-lg shadow-lg"
                       >
                         <div className="flex justify-between">
                           <h2 className="text-xl font-semibold">გადახდა</h2>

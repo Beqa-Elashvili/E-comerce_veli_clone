@@ -163,8 +163,8 @@ function Cart() {
                   />
                   <div className="block lg:flex justify-between w-full gap-2">
                     <div>
-                      <h1 className="text-xl ">{item.name}</h1>
-                      <p className="text-sm">{item.description}</p>
+                      <h1 className="text-xl max-w-20 ">{item.name}</h1>
+                      <p className="text-sm md:w-40">{item.description}</p>
                       <div className="flex gap-2 mt-2">
                         {(item.selectedColor || item.selectedSize) && (
                           <>
