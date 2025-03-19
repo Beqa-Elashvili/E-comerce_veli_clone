@@ -78,7 +78,7 @@ function Main() {
                 onClick={() => router.push(`/category/${item.name}`)}
                 className="text-center max-w-[75px] h-36 lg:h-44 lg:max-w-36"
               >
-                <div className="bg-gray-200 relative cursor-pointer h-full hover:bg-gray-300 overflow-hidden rounded-lg">
+                <div className="bg-gray-200 relative cursor-pointer h-full md:hover:bg-gray-300 overflow-hidden rounded-lg">
                   <h2 className="px-2 text-balance h-20 py-6 text-[10px] md:text-sm lg:font-semibold tracking-wider">
                     {item.name}
                   </h2>
@@ -139,10 +139,10 @@ function Main() {
         {products?.map((product: Product) => {
           const isCart = handleIsCart(product.id);
           return (
-            <div key={product.id} className=" px-0 md:px-4">
+            <div key={product.id} className="px-2 w-full md:px-4">
               <div
                 onClick={() => router.push(`/productId/${product.id}`)}
-                className="rounded-lg h-[220px] md:h-[300px] hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+                className="rounded-lg h-[240px] md:h-[300px] hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
               >
                 <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
                   <div className="flex flex-col items-center gap-2 ">
@@ -183,15 +183,13 @@ function Main() {
                     </div>
                   )}
                   <div className="text-start md:h-20 mt-2">
-                    <p className="font-semibold text-sm">
-                      ფასი: {product.price} ₾
-                    </p>
-                    <p className="text-sm hidden md:block mt-2">
+                    <p className="font-semibold text-sm">{product.price} ₾</p>
+                    <p className="text-sm h-10 w-28 hidde md:block mt-2">
                       {product.description?.slice(0, 20)}...
                     </p>
                   </div>
                 </div>
-                <div className="flex md:hidden">
+                <div className="flex w-full justify-between md:hidden">
                   <Heart
                     onClick={(e) => {
                       e.stopPropagation();
@@ -209,7 +207,7 @@ function Main() {
                       e.stopPropagation();
                       addToCartWithVariants(product);
                     }}
-                    className=" h-8 w-full border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                    className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
                   />
                 </div>
               </div>

@@ -1,3 +1,4 @@
+import getSession from "@/app/actions/getSession";
 import prisma from "@/app/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
@@ -75,30 +76,41 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+export async function GET(req: NextRequest) {
+  const session = await getSession(); // Get session data
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { orderId: string } }
-) {
+  // Check if the session exists
+  if (!session || !session.user?.email) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  // Find the user from the database using the session email
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+
+  // Check if the user exists
+  if (!user) {
+    return NextResponse.json({ message: "User not found" }, { status: 404 });
+  }
+
+  if (!user.id) {
+    return NextResponse.json(
+      { message: "User ID is required" },
+      { status: 400 }
+    );
+  }
+
   try {
-    const orderId = parseInt(params.orderId);
-
-    if (!orderId) {
-      return NextResponse.json(
-        { message: "Order ID is required" },
-        { status: 400 }
-      );
-    }
-
-    // Fetch the order by ID
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
+    // Fetch all orders for the authenticated user
+    const orders = await prisma.order.findMany({
+      where: { userId: user.id }, // Filter orders by user ID
       include: {
         items: {
           include: {
             product: {
               include: {
-                images: true,
+                images: true, // Include product images
               },
             },
           },
@@ -106,14 +118,15 @@ export async function GET(
       },
     });
 
-    if (!order) {
-      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+    // If no orders are found for the user
+    if (orders.length === 0) {
+      return NextResponse.json({ message: "No orders found" }, { status: 404 });
     }
 
-    // Return order details
-    return NextResponse.json({ order }, { status: 200 });
+    // Return the orders for the authenticated user
+    return NextResponse.json({ orders }, { status: 200 });
   } catch (error) {
-    console.error("Error occurred while retrieving order:", error);
+    console.error("Error occurred while retrieving orders:", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

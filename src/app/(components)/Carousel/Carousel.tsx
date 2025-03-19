@@ -70,7 +70,6 @@ function CarouselComp({
       {Cover && <div className="text-center pb-8 rounded-lg">{Cover}</div>}
       <div className="relative">
         <Carousel
-          autoplay={{ dotDuration: true }}
           slidesToScroll={2}
           className="relative"
           nextArrow={<NextArrow />}
