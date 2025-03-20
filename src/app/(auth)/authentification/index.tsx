@@ -1,19 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "@/app/(components)/Button";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
 import { FieldValues, SubmitHandler } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsRegisterForm } from "@/redux/globalSlice";
 import axios from "axios";
 import { Form, Input } from "antd";
 import { toast } from "react-toastify";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import useGetUser from "@/app/actions/getUser";
 import { HashLoader } from "react-spinners";
 import useGetCartItems from "@/app/hooks/getCartItems";
+import { setIsAuthModalOpen } from "@/redux/globalSlice";
 
 function Register() {
   const [showPassword, setShowPassword] = useState({
@@ -21,9 +22,16 @@ function Register() {
     repeatPassword: false,
   });
   const [loading, setLoading] = useState<boolean>(false);
+  const { status } = useSession();
 
   const { getUser } = useGetUser();
   const { GetCart } = useGetCartItems();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      dispatch(setIsAuthModalOpen(false));
+    }
+  }, [status]);
 
   const [form] = Form.useForm();
 
@@ -120,7 +128,7 @@ function Register() {
       setLoading(false);
     }
   };
-
+  const authe = useAppSelector((state) => state.global.isAuthModalOpen);
   const togglePasswordVisibility = (field: "password" | "repeatPassword") => {
     setShowPassword((prev) => ({
       ...prev,
@@ -140,9 +148,20 @@ function Register() {
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center">
-      <div className="border bg-white py-12 mx-4 px-4 z-30 mt-12 w-full md:w-2/3 lg:w-1/2 m-auto shadow-custom-light rounded-lg flex flex-col items-center justify-center h-full">
-        <div className="font-bold   text-md  w-4/6  md:text-2xl flex items-center justify-between gap-8">
+    <div className="w-full  min-h-screen flex flex-col items-center justify-center">
+      <div className="border relative bg-white py-12 mx-4 px-4 z-30 mt-12 w-full md:w-2/3 lg:w-2/5 m-auto shadow-custom-light rounded-lg flex flex-col items-center justify-center h-full">
+        <div
+          onClick={() => dispatch(setIsAuthModalOpen(false))}
+          className="bg-white cursor-pointer z-50 w-8 h-8 rounded-full flex items-center justify-center absolute -top-9 right-2"
+        >
+          <X />
+        </div>
+        {!isRegisterForm ? (
+          <h1 className="text-3xl font-bold mb-8">გაიარე ავტორიზაცია</h1>
+        ) : (
+          <h1 className="text-3xl font-bold mb-8">შექმენი ანგარიში</h1>
+        )}
+        <div className="font-bold   text-md  w-4/6  md:text-xl flex items-center justify-between gap-8">
           <div
             onClick={() => toggleIsRegisterForm("LOGIN")}
             className={`${

@@ -40,6 +40,8 @@ import CarouselComp from "../Carousel/Carousel";
 import { setIsAllCategories } from "@/redux/categorySlice";
 import { setShowResults } from "@/redux/globalSlice";
 import { Package, MapPin } from "lucide-react";
+import { setIsAuthModalOpen } from "@/redux/globalSlice";
+import Register from "@/app/(auth)/authentification";
 
 const Navbar = () => {
   const { status } = useSession();
@@ -48,6 +50,9 @@ const Navbar = () => {
   const router = useRouter();
   const { handleCartQuantity, handleTotalPrice } = useHandleCartquantity();
   const { handleQuantityIncart } = useHandleQuantityIncart();
+  const isAuthModalOpen = useAppSelector(
+    (state) => state.global.isAuthModalOpen
+  );
 
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
   const toggleTheme = () => {
@@ -99,6 +104,7 @@ const Navbar = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const userRef = useRef<HTMLInputElement>(null);
   const [showUser, setShowUser] = useState<boolean>(false);
+  const authRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -157,6 +163,31 @@ const Navbar = () => {
   }, [cart, showCart]);
 
   useEffect(() => {
+    if (isAuthModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (authRef.current) {
+        if (!authRef.current.contains(event.target as Node)) {
+          dispatch(setIsAuthModalOpen(false));
+        }
+      }
+    };
+
+    if (isAuthModalOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "auto";
+    };
+  }, [isAuthModalOpen, dispatch]);
+
+  useEffect(() => {
     if (showUser) {
       document.body.style.overflow = "hidden";
     } else {
@@ -179,9 +210,6 @@ const Navbar = () => {
   useEffect(() => {
     setShowCart(false);
     dispatch(setShowResults(false));
-  }, [pathname]);
-
-  useEffect(() => {
     setValue("");
     setSearchResults([]);
     setShowUser(false);
@@ -289,6 +317,19 @@ const Navbar = () => {
     <div
       className={`flex sticky top-0 z-40 justify-between gap-12 bg-main py-4 px-2 lg:px-8 xl:px-40 items-center w-full mb-7`}
     >
+      <div
+        ref={authRef}
+        className={` ${
+          isAuthModalOpen ? "block" : "hidden"
+        } fixed bg-gray-800 inset-0 z-40 h-full bg-opacity-60`}
+      >
+        {isAuthModalOpen && (
+          <div className="absolute inset-0 top-12">
+            {isAuthModalOpen && <Register />}
+          </div>
+        )}
+      </div>
+
       <div
         ref={searchRef}
         className={` ${
@@ -519,7 +560,7 @@ const Navbar = () => {
                 </div>
               </>
             ) : (
-              <div onClick={() => router.push("/authentification")}>
+              <div onClick={() => dispatch(setIsAuthModalOpen(true))}>
                 {status === "loading" ? (
                   <DotLoader color="#3032ae" size={12} className="w-12" />
                 ) : (
@@ -577,7 +618,7 @@ const Navbar = () => {
                 </div>
                 <hr />
                 <button
-                  onClick={() => signOut()}
+                  onClick={() => SignOut()}
                   className="flex mt-4 items-center gap-4"
                 >
                   <LogOut />

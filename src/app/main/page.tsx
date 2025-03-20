@@ -15,11 +15,11 @@ import { setIsAllCategories } from "@/redux/categorySlice";
 function Main() {
   const router = useRouter();
   const categories = useAppSelector((state) => state.categories.Categories);
+
   const { addWishlistItem } = useAddinWinshilst();
   const { IsWishlist } = useGetIsWishlist();
   const [products, setProducts] = useState<Product[]>([]);
   const dispatch = useAppDispatch();
-
   const { addToCartWithVariants } = useAddToCartMain();
   const user = useAppSelector((state) => state.user.user);
   const { status } = useSession();

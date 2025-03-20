@@ -280,6 +280,7 @@ export async function DELETE(req: NextRequest) {
       selectedColor,
       selectedSize,
       decrease = false,
+      deleteAll = false,
     } = await req.json();
 
     const session = await getSession();
@@ -303,13 +304,6 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    if (!productId) {
-      return NextResponse.json(
-        { message: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
     const cart = await prisma.cart.findUnique({
       where: { userId: user.id },
       include: { cartItems: true },
@@ -319,6 +313,24 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json(
         { message: "Cart not found for this user" },
         { status: 404 }
+      );
+    }
+    if (deleteAll) {
+      await prisma.cartItem.deleteMany({
+        where: {
+          cartId: cart.id,
+        },
+      });
+
+      return NextResponse.json(
+        { message: "All cart items successfully deleted" },
+        { status: 200 }
+      );
+    }
+    if (!productId) {
+      return NextResponse.json(
+        { message: "Missing required fields" },
+        { status: 400 }
       );
     }
 

@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import { useState } from "react";
-import { useAppSelector } from "../redux";
+import { useAppDispatch, useAppSelector } from "../redux";
 import { Form, Input, Checkbox, Select } from "antd";
 import Button from "../(components)/Button";
 import { SubmitHandler, FieldValues } from "react-hook-form";
@@ -24,6 +24,7 @@ import axios from "axios";
 import { Product, ShippingAddress } from "../types/globalStateTypes";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { setIsCartItemUnauthentificated } from "@/redux/globalSlice";
 
 function Chackout() {
   const [isInfo, setIsInfo] = useState<boolean>(true);
@@ -42,6 +43,7 @@ function Chackout() {
   const [isAddShoppingAddress, setisAddShoppingAddress] =
     useState<boolean>(false);
   const [shippingAddress, setshippingAddress] = useState<ShippingAddress[]>([]);
+  const dispatch = useAppDispatch();
 
   const cart = useAppSelector(
     (state) => state.global.isCartItemUnauthentificated
@@ -224,6 +226,7 @@ function Chackout() {
   }, [isModalOpen]);
 
   const [success, setSuccess] = useState<boolean>(false);
+  console.log(cart);
 
   const handleModalSubmit: SubmitHandler<FieldValues> = async (data) => {
     try {
@@ -231,12 +234,19 @@ function Chackout() {
         userId: user?.id,
         cartItems: cart,
         shippingAddress: chosenShipingAddress,
-      });
-      const response = await axios.post("/api/payments", {
-        orderId: resp.data.order.id,
         paymentMethod: "CREDIT_CARD",
-        userId: user?.id,
       });
+      // const response = await axios.post("/api/payments", {
+      //   orderId: resp.data.order.id,
+      //   paymentMethod: "CREDIT_CARD",
+      //   userId: user?.id,
+      // });
+      const deleteCartitems = await axios.delete("/api/cart", {
+        data: {
+          deleteAll: true,
+        },
+      });
+      dispatch(setIsCartItemUnauthentificated([]));
       setSuccess(true);
     } catch (error) {
       console.log(error);

@@ -9,6 +9,7 @@ export interface initialStateTypes {
   isCartItemUnauthentificated: Product[] | null;
   isProducts: Product[] | null;
   isWishlist: Product[] | null;
+  isAuthModalOpen: boolean;
 }
 
 const initialState: initialStateTypes = {
@@ -16,6 +17,7 @@ const initialState: initialStateTypes = {
   isProducts: null,
   isShowResults: false,
   isDarkMode: false,
+  isAuthModalOpen: false,
   isRegisterForm: false,
   isCartItemUnauthentificated: null,
   isWishlist: null,
@@ -49,11 +51,15 @@ const globalSlice = createSlice({
     setISDarkMode: (state, action: PayloadAction<boolean>) => {
       state.isDarkMode = action.payload;
     },
+    setIsAuthModalOpen: (state, action: PayloadAction<boolean>) => {
+      state.isAuthModalOpen = action.payload;
+    },
   },
 });
 
 export const {
   setIsSideBarCollapsed,
+  setIsAuthModalOpen,
   setISDarkMode,
   setShowResults,
   setIsRegisterForm,
