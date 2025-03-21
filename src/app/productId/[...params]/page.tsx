@@ -14,6 +14,7 @@ import useDeleteCartItem from "@/app/hooks/useDeleteCartItem";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import { GridLoader } from "react-spinners";
+import { useRouter } from "next/navigation";
 
 type ProductIdProps = {
   params: Promise<{
@@ -22,7 +23,6 @@ type ProductIdProps = {
 };
 
 function ProductId({ params }: ProductIdProps) {
-  const { params: routeParams } = use(params);
   const [imgUrl, setImageUrl] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const { addWishlistItem } = useAddinWinshilst();
@@ -31,9 +31,10 @@ function ProductId({ params }: ProductIdProps) {
   const { deleteCartItem } = useDeleteCartItem();
   const { status } = useSession();
   const [product, setProduct] = useState<Product>();
-  const [id] = routeParams || [];
+  const [supportProducts, setSupportProducts] = useState<Product[]>([]);
   const user = useAppSelector((state) => state.user.user);
-
+  const { params: routeParams } = use(params);
+  const [id] = routeParams || [];
   const cart = useAppSelector(
     (state) => state.global.isCartItemUnauthentificated
   );
@@ -47,6 +48,11 @@ function ProductId({ params }: ProductIdProps) {
     async function getProduct() {
       try {
         const resp = await axios.get(`/api/products?id=${id}`);
+        const respCart = await axios.get(
+          `/api/categories?name=${resp.data.product.category.name}`
+        );
+        setSupportProducts(respCart.data.category.Product);
+        console.log(respCart);
         setProduct(resp.data.product);
         setImageUrl(resp.data.product?.images[0].url);
         setLoading(false);
@@ -107,7 +113,6 @@ function ProductId({ params }: ProductIdProps) {
       }
     }
   };
-
   const handleCartItemId = async (id: number) => {
     if (status === "unauthenticated") {
       setLoadingStates((prev) => ({
@@ -191,6 +196,7 @@ function ProductId({ params }: ProductIdProps) {
       }
 
       if (!isVariantAvailable(1)) {
+        toast.dismiss();
         toast.error("ამ ფერის ან ზომის პროდუქტი აღარ არის მარაგში");
         return;
       }
@@ -217,11 +223,16 @@ function ProductId({ params }: ProductIdProps) {
       addToCart(user?.id as unknown as string, product, 1);
     }
   };
+  const router = useRouter();
+
+  const buy = () => {
+    handleAddToCart();
+    router.push("/chackout");
+  };
 
   return (
     <div className="w-full">
-      <div className="block md:flex justify-between items-center w-full py-8">
-        <h1>ID: {product.id}</h1>
+      <div className="w-full flex justify-end">
         <div
           onClick={() =>
             addWishlistItem(
@@ -229,7 +240,7 @@ function ProductId({ params }: ProductIdProps) {
               product.id as unknown as string
             )
           }
-          className="ring-1 mt-2 md:mt-0 hover:ring-2 transition hover:text-sky-800 cursor-pointer duration-300 flex p-2 rounded-lg justify-between gap-2 ring-sky-700"
+          className="ring-1 inline-flex justify-end mt-2 md:mt-0 hover:ring-2 transition hover:text-sky-800 cursor-pointer duration-300  p-2 rounded-lg  gap-2 ring-sky-700"
         >
           <Heart
             className={`${
@@ -242,6 +253,10 @@ function ProductId({ params }: ProductIdProps) {
               : "დაამატე სურვილების სიაში"}
           </p>
         </div>
+      </div>
+      <div className="flex justify-between items-center w-full py-8">
+        <h1 className="text-2xl font-semibold">{product.name}</h1>
+        <h1>ID: {product.id}</h1>
       </div>
       <div className="md:flex justify-between gap-12">
         <div className="block md:flex w-full gap-10">
@@ -279,7 +294,7 @@ function ProductId({ params }: ProductIdProps) {
             </h2>
             <hr />
             <div>
-              {product.stock <= 0 ? (
+              {(stock && stock?.stock <= 0) || product.stock <= 0 ? (
                 <h1 className="text-red-500">მარაგი ამოიწურა</h1>
               ) : (
                 <h1 className="text-sky-700">მარაგშია</h1>
@@ -343,9 +358,11 @@ function ProductId({ params }: ProductIdProps) {
             )}
           </div>
         </div>
-        <div className="my-4 md:my-0 ring-1 p-4 rounded-lg flex flex-col gap-2 min-w-80">
-          <h1 className="flex gap-2 font-semibold text-xl">
-            {product.price} <span>₾</span>
+        <hr className="block mt-5 md:hidden" />
+
+        <div className="my-4 md:my-0 md:shadow-custom-light p-4 rounded-lg flex flex-col gap-2 min-w-80">
+          <h1 className="flex gap-2  font-semibold text-3xl">
+            {product.price} ₾
           </h1>
           <p className="text-sm font-semibold flex gap-2">
             <Truck />
@@ -394,11 +411,18 @@ function ProductId({ params }: ProductIdProps) {
           )}
           <button
             onClick={handleAddToCart}
-            className="flex p-4 mt-8 gap-4 bg-sky-400 font-semibold text-gray-900 tracking-wider hover:shadow-inner items-center justify-center ring-1 rounded-lg"
+            className="flex p-4 mt-8 gap-4 bg-green-600 font-semibold text-white tracking-wider hover:shadow-inner items-center justify-center ring-1 rounded-lg"
           >
             <ShoppingCart />
             კალათაში დამატება
           </button>
+          <button
+            onClick={() => buy}
+            className="flex p-4 mt-2 gap-4 bg-black font-semibold text-white tracking-wider hover:shadow-inner items-center justify-center ring-1 rounded-lg"
+          >
+            ყიდვა
+          </button>
+          <div></div>
         </div>
       </div>
     </div>

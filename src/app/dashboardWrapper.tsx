@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Sidebar from "./(components)/SideBar";
 import Navbar from "./(components)/Navbar";
-import { Product } from "./types/globalStateTypes";
 import StoreProvider, { useAppSelector, useAppDispatch } from "./redux";
 import { usePathname } from "next/navigation";
 import { setCategories } from "@/redux/categorySlice";
@@ -14,6 +12,8 @@ import useGetCartItems from "./hooks/getCartItems";
 import useGetWishlistItems from "./hooks/getWislistItems";
 import MobileFooter from "./(components)/mobilefooter";
 import AllCategories from "./(components)/AllCategories/isAllCategories";
+import { Product } from "./types/globalStateTypes";
+import { setIsCartItemUnauthentificated } from "@/redux/globalSlice";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { status } = useSession();
@@ -23,10 +23,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-
-  const isSideBarCollapsed = useAppSelector(
-    (state) => state.global?.isSideBarCollapsed
-  );
 
   useEffect(() => {
     async function getMainItems() {
@@ -47,6 +43,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       getUser();
       GetCart();
       getWishlistItems();
+    } else {
+      let cart: Product[] = [];
+      const storedCart = localStorage.getItem("cart");
+      if (storedCart) {
+        cart = JSON.parse(storedCart);
+      }
+      dispatch(setIsCartItemUnauthentificated(cart));
     }
   }, [dispatch, status]);
 
@@ -65,13 +68,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex w-full">
-      {/* <div
-        className={` ${
-          isDarkMode ? "dark" : "light"
-        }  bg-gray-50 text-gray-900 min-h-screen`}
-      >
-        {!isAuth && <Sidebar />}
-      </div> */}
       <div
         className={` ${
           isDarkMode ? "dark" : "light"

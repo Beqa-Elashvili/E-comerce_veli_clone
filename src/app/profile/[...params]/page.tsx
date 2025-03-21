@@ -277,9 +277,7 @@ function page({ params }: ProfileProps) {
           </div>
           <hr />
           <div
-            onClick={() => {
-              signOut(), router.push("/");
-            }}
+            onClick={() => signOut()}
             className="flex text-lg cursor-pointer w-full mr-12 items-center gap-6 p-4 rounded-xl"
           >
             <LogOut />

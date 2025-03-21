@@ -21,8 +21,10 @@ export default function addToCartUnauthenticated(
       item.selectedSize === product.selectedSize
   );
 
+
   const currentQuantity = existingCartItem ? existingCartItem.quantity || 0 : 0;
   const totalQuantity = currentQuantity + quantity;
+  console.log(totalQuantity)
 
   if (product.VariantStock || product.stock)
     if (
