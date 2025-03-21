@@ -55,6 +55,19 @@ function page({ params }: ProfileProps) {
       console.log(error);
     }
   };
+  const deleteOrder = async (id: number) => {
+    try {
+      await axios.delete("/api/orders", {
+        data: {
+          orderId: id,
+        },
+      });
+      await handleParams(name);
+      console.log("delete succesfuly");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const handleName = () => {
     if (name === "addresses") {
@@ -138,7 +151,10 @@ function page({ params }: ProfileProps) {
                 <Heart className="text-center w-full" />
                 დააჭირე ნიშანს სასურველ პროდუქტზე და შეინახე სურვილების სიაში.
               </p>
-              <button onClick={() => router.push("/")} className="bg-black text-white font-semibold rounded-lg p-4 ">
+              <button
+                onClick={() => router.push("/")}
+                className="bg-black text-white font-semibold rounded-lg p-4 "
+              >
                 დაამატე პროდუტები
               </button>
             </div>
@@ -167,7 +183,15 @@ function page({ params }: ProfileProps) {
                         </div>
                       </div>
                     </div>
-                    <h1 className="text-sm">status:{item.status}</h1>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => deleteOrder(item.id)}
+                        className="border text-white bg-red-500 w-full rounded-lg"
+                      >
+                        წაშლა
+                      </button>
+                      <h1 className="text-sm">status:{item.status}</h1>
+                    </div>
                   </div>
                   <hr />
                 </div>

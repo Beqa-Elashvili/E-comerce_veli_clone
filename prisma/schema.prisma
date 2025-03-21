@@ -102,16 +102,6 @@ model Category {
   Product Product[]
 }
 
-model OrderItem {
-  id        Int     @id @default(autoincrement())
-  orderId   Int
-  productId Int
-  quantity  Int
-  price     Float
-  product   Product @relation(fields: [productId], references: [id])
-  order     Order   @relation(fields: [orderId], references: [id])
-}
-
 model Cart {
   id        Int        @id @default(autoincrement())
   userId    Int        @unique
@@ -150,17 +140,31 @@ model WishlistItem {
 }
 
 model Order {
-  id          Int         @id @default(autoincrement())
-  orderNumber String      @unique
-  userId      Int
-  totalAmount Float
-  status      OrderStatus
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  user        User        @relation(fields: [userId], references: [id])
-  items       OrderItem[]
+  id                Int              @id @default(autoincrement())
+  orderNumber       String           @unique
+  userId            Int
+  totalAmount       Float
+  status            OrderStatus
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  user              User             @relation(fields: [userId], references: [id])
+  items             OrderItem[]
+  payment           Payment? // Remove `onDelete` here
+  shippingAddress   ShippingAddress? @relation(onDelete: Cascade, fields: [shippingAddressId], references: [id])
+  shippingAddressId Int?
+}
 
-  payment Payment?
+model OrderItem {
+  id            Int     @id @default(autoincrement())
+  orderId       Int
+  productId     Int
+  quantity      Int
+  price         Float
+  selectedColor String? // Optional field for color
+  selectedSize  String? // Optional field for size
+
+  product Product @relation(fields: [productId], references: [id])
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model Payment {
@@ -171,7 +175,7 @@ model Payment {
   method    PaymentMethod
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
-  order     Order         @relation(fields: [orderId], references: [id])
+  order     Order         @relation(fields: [orderId], references: [id], onDelete: Cascade) // Keep `onDelete` here
 }
 
 model ShippingAddress {
@@ -184,7 +188,8 @@ model ShippingAddress {
   name       String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade) // Cascade delete for shipping address
+  Order      Order[]
 }
 
 model SalesAnalytics {

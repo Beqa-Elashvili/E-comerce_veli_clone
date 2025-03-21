@@ -1,12 +1,12 @@
 import getSession from "@/app/actions/getSession";
 import prisma from "@/app/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+
 export async function POST(req: NextRequest) {
   try {
     const { userId, cartItems, shippingAddress, paymentMethod } =
       await req.json();
 
-    // Check for missing fields
     if (
       !userId ||
       !cartItems ||
@@ -20,7 +20,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Step 1: Calculate total amount for the order and prepare order items
     let totalAmount = 0;
     const orderItems = [];
 
@@ -43,10 +42,11 @@ export async function POST(req: NextRequest) {
         productId: item.productId,
         quantity: item.quantity,
         price: product.price,
+        selectedColor: item.selectedColor || null,
+        selectedSize: item.selectedSize || null,
       });
 
       if (item.selectedColor || item.selectedSize) {
-        // Fetch the Color and Size by name
         let colorId = null;
         if (item.selectedColor) {
           const color = await prisma.color.findUnique({
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
 
         if (!productVariant || productVariant.stock < item.quantity) {
           console.error(
-            `Not enough stock for variant of product ${item.productId}, this is variant = ${productVariant}`
+            `Not enough stock for variant of product ${item.productId}`
           );
           return NextResponse.json(
             {
@@ -103,6 +103,25 @@ export async function POST(req: NextRequest) {
             stock: productVariant.stock - item.quantity,
           },
         });
+      } else {
+        if (product.stock < item.quantity) {
+          console.error(
+            `Not enough stock for product ${item.productId}, this is base product`
+          );
+          return NextResponse.json(
+            {
+              message: `Not enough stock for product ${item.productId}`,
+            },
+            { status: 400 }
+          );
+        }
+
+        await prisma.product.update({
+          where: { id: product.id },
+          data: {
+            stock: product.stock - item.quantity,
+          },
+        });
       }
     }
 
@@ -115,39 +134,26 @@ export async function POST(req: NextRequest) {
         items: {
           create: orderItems,
         },
+        shippingAddressId: shippingAddress.id,
       },
     });
 
-    await prisma.shippingAddress.create({
-      data: {
-        userId: userId,
-        address: shippingAddress.address,
-        city: shippingAddress.city,
-        postalCode: shippingAddress.postalCode,
-        country: shippingAddress.country,
-        name: shippingAddress.name,
-      },
-    });
-
-    // Step 4: Process the payment
     const payment = await prisma.payment.create({
       data: {
         orderId: order.id,
         amount: order.totalAmount,
-        method: paymentMethod, // E.g., CREDIT_CARD, PAYPAL, etc.
-        status: "PENDING", // Initially set to pending
+        method: paymentMethod,
+        status: "PENDING",
       },
     });
 
-    // Step 5: Mock payment success (Replace with real payment gateway logic)
     await prisma.payment.update({
       where: { id: payment.id },
       data: {
-        status: "SUCCESS", // After payment is successful
+        status: "SUCCESS",
       },
     });
 
-    // Step 6: Update Order status to COMPLETED after payment
     await prisma.order.update({
       where: { id: order.id },
       data: {
@@ -155,7 +161,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Step 7: Return payment and order details
     return NextResponse.json(
       {
         message: "Order created and payment processed successfully",
@@ -176,7 +181,7 @@ export async function POST(req: NextRequest) {
   }
 }
 export async function GET(req: NextRequest) {
-  const session = await getSession(); // Get session data
+  const session = await getSession();
 
   if (!session || !session.user?.email) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -198,7 +203,6 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Fetch orders with related order items
     const orders = await prisma.order.findMany({
       where: { userId: user.id },
       include: {
@@ -207,6 +211,8 @@ export async function GET(req: NextRequest) {
             product: {
               include: {
                 images: true,
+                Color: true,
+                Size: true,
               },
             },
           },
@@ -218,29 +224,16 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "No orders found" }, { status: 404 });
     }
 
-    // Now, map through the orders and add selectedColor, selectedSize, and quantity
     const formattedOrders = await Promise.all(
-      orders.map(async (order) => {
-        const formattedItems = await Promise.all(
-          order.items.map(async (item) => {
-            // Fetch the corresponding cart item to get selectedColor, selectedSize, and quantity
-            const cartItem = await prisma.cartItem.findFirst({
-              where: {
-                productId: item.productId,
-                cart: {
-                  userId: user.id,
-                },
-              },
-            });
-
-            return {
-              ...item,
-              selectedColor: cartItem?.selectedColor || null,
-              selectedSize: cartItem?.selectedSize || null,
-              quantity: cartItem?.quantity || 0,
-            };
-          })
-        );
+      orders.map(async (order: any) => {
+        const formattedItems = order.items.map((item: any) => {
+          return {
+            ...item,
+            selectedColor: item.selectedColor || null,
+            selectedSize: item.selectedSize || null,
+            quantity: item.quantity || 0,
+          };
+        });
 
         return {
           ...order,
@@ -254,6 +247,87 @@ export async function GET(req: NextRequest) {
     console.error("Error occurred while retrieving orders:", error);
     return NextResponse.json(
       { message: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const { orderId } = await req.json();
+
+  if (!orderId) {
+    return NextResponse.json(
+      { message: "Order ID is required" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const session = await getSession();
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        items: true,
+        payment: true,
+        shippingAddress: true,
+      },
+    });
+
+    if (!order) {
+      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+    }
+
+    if (order.userId !== user.id) {
+      return NextResponse.json(
+        { message: "You are not authorized to delete this order" },
+        { status: 403 }
+      );
+    }
+
+    // Deleting the order items (order details)
+    await prisma.orderItem.deleteMany({
+      where: { orderId: orderId },
+    });
+
+    // If the order has a payment record, delete it
+    if (order.payment) {
+      await prisma.payment.delete({
+        where: { id: order.payment.id },
+      });
+    }
+
+    // If the order has a shipping address, delete it
+    if (order.shippingAddress) {
+      await prisma.shippingAddress.delete({
+        where: { id: order.shippingAddress.id },
+      });
+    }
+
+    // Finally, delete the order itself
+    await prisma.order.delete({
+      where: { id: orderId },
+    });
+
+    return NextResponse.json(
+      { message: "Order deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error occurred during order deletion:", error);
+    return NextResponse.json(
+      { message: "Internal server error", error },
       { status: 500 }
     );
   }

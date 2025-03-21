@@ -38,7 +38,7 @@ function MobileFooter() {
         <p className="font-semibold text-sm">კალათა</p>
       </div>
       <div
-        onClick={() => {}}
+        onClick={() => router.push("/profile/name")}
         className=" flex-col cursor-pointer group flex rounded-lg overflow-hidden items-center  ring-white transition duration-300"
       >
         <UserRound className="h-5" />

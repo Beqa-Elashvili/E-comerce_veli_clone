@@ -226,22 +226,17 @@ function Chackout() {
   }, [isModalOpen]);
 
   const [success, setSuccess] = useState<boolean>(false);
-  console.log(cart);
 
   const handleModalSubmit: SubmitHandler<FieldValues> = async (data) => {
     try {
-      const resp = await axios.post("/api/orders", {
+      await axios.post("/api/orders", {
         userId: user?.id,
         cartItems: cart,
         shippingAddress: chosenShipingAddress,
         paymentMethod: "CREDIT_CARD",
       });
-      // const response = await axios.post("/api/payments", {
-      //   orderId: resp.data.order.id,
-      //   paymentMethod: "CREDIT_CARD",
-      //   userId: user?.id,
-      // });
-      const deleteCartitems = await axios.delete("/api/cart", {
+
+      await axios.delete("/api/cart", {
         data: {
           deleteAll: true,
         },
@@ -254,7 +249,7 @@ function Chackout() {
       const timeOut = setTimeout(() => {
         setSuccess(false);
       }, 1000);
-      router.push("/");
+      // router.push("/");
       return () => clearTimeout(timeOut);
     }
   };
@@ -507,7 +502,10 @@ function Chackout() {
                     <>
                       <div className="border hover:text-gray-800 cursor-pointer flex justify-between items-center rounded-lg p-4 w-full">
                         {!chosenShipingAddress ? (
-                          <div onClick={() => setisAddShoppingAddress(true)}>
+                          <div
+                            className="flex justify-between w-full items-center"
+                            onClick={() => setisAddShoppingAddress(true)}
+                          >
                             <div className="flex items-center gap-4">
                               <MapPin className="bg-gray-400 p-2 size-12 rounded-lg" />
                               <div>
