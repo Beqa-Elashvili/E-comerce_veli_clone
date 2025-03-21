@@ -84,6 +84,7 @@ function Register() {
         toast.success("თქვენ წარმატებით დარეგისტრირდით!");
         dispatch(setIsRegisterForm(false));
       } else {
+        setLoading(true);
         signIn("credentials", {
           ...data,
           redirect: false,
@@ -229,6 +230,7 @@ function Register() {
                     name="phoneNumber"
                     className="py-2"
                     required
+                    maxLength={9}
                     placeholder="მობილურის ნომერი"
                     type="number"
                   />
@@ -324,7 +326,7 @@ function Register() {
             <hr className="mb-4" />
             {isRegisterForm ? (
               <Button
-                className="bg-cyan-500 flex gap-2 justify-center  text-center font-semibold w-full focus:outline-none ring-1 rounded-md px-2 py-2 hover:ring-cyan-600  focus:ring-2 duration-300 transition"
+                className="bg-black text-white flex gap-2 justify-center  text-center font-semibold w-full focus:outline-none ring-1 rounded-md px-2 py-4 hover:ring-cyan-600  focus:ring-2 duration-300 transition"
                 type="submit"
               >
                 ანგარიშის შექმნა
@@ -332,7 +334,7 @@ function Register() {
               </Button>
             ) : (
               <Button
-                className="bg-cyan-500 flex gap-2 justify-center  text-center font-semibold w-full focus:outline-none ring-1 rounded-md px-2 py-2 hover:ring-cyan-600  focus:ring-2 duration-300 transition"
+                className="bg-black text-white  flex gap-2 justify-center  text-center font-semibold w-full focus:outline-none ring-1 rounded-md px-2 py-4 hover:ring-cyan-600  focus:ring-2 duration-300 transition"
                 type="submit"
               >
                 შესვლა
