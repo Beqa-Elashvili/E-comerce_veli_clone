@@ -79,7 +79,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       >
         <Navbar />
         <main className={` ${!isAuth && "px-4 lg:px-8 xl:px-40"} `}>
-          {isAllCategories ? <AllCategories /> : <> {children}</>}
+          {isAllCategories ? <AllCategories /> : <>{children}</>}
         </main>
         <div className="block z-50 sticky bottom-0 lg:hidden">
           <MobileFooter />

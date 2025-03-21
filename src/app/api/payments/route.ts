@@ -12,35 +12,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Step 1: Find the order
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      include: { items: true }, // Include order items
+      include: { items: true }, 
     });
 
     if (!order) {
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
     }
 
-    // Step 2: Create the payment record
     const payment = await prisma.payment.create({
       data: {
         orderId: order.id,
         amount: order.totalAmount,
-        method: paymentMethod, // E.g., CREDIT_CARD, PAYPAL, etc.
-        status: "PENDING", // Initially set to pending
+        method: paymentMethod, 
+        status: "PENDING", 
       },
     });
 
-    // Step 3: Mock payment success (Replace with real payment gateway logic)
     await prisma.payment.update({
       where: { id: payment.id },
       data: {
-        status: "SUCCESS", // After payment is successful
+        status: "SUCCESS", 
       },
     });
 
-    // Step 4: Update Order status to COMPLETED after payment
     await prisma.order.update({
       where: { id: order.id },
       data: {
@@ -48,7 +44,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Step 5: Return payment and order details
     return NextResponse.json(
       { message: "Payment processed successfully", payment, order },
       { status: 200 }

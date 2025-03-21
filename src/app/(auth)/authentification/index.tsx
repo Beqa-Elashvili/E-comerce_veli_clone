@@ -128,7 +128,6 @@ function Register() {
       setLoading(false);
     }
   };
-  const authe = useAppSelector((state) => state.global.isAuthModalOpen);
   const togglePasswordVisibility = (field: "password" | "repeatPassword") => {
     setShowPassword((prev) => ({
       ...prev,
@@ -149,7 +148,7 @@ function Register() {
 
   return (
     <div className="w-full  min-h-screen flex flex-col items-center justify-center">
-      <div className="border relative bg-white py-12 mx-4 px-4 z-30 mt-12 w-full md:w-2/3 lg:w-2/5 m-auto shadow-custom-light rounded-lg flex flex-col items-center justify-center h-full">
+      <div className="border relative bg-white py-12 mx-4 px-4 z-30  mt-0 lg:mt-12 w-full md:w-2/3 lg:w-2/5 m-auto shadow-custom-light rounded-lg flex flex-col items-center justify-center h-full">
         <div
           onClick={() => dispatch(setIsAuthModalOpen(false))}
           className="bg-white cursor-pointer z-50 w-8 h-8 rounded-full flex items-center justify-center absolute -top-9 right-2"

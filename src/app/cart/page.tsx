@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useAppSelector } from "../redux";
+import React, { useEffect, useRef, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../redux";
 import { Product } from "../types/globalStateTypes";
 import useDeleteCartItem from "../hooks/useDeleteCartItem";
 import useAddToCart from "../hooks/addToCart";
@@ -13,6 +13,7 @@ import useHandleQuantityIncart from "../hooks/useHandleQuantityInCart";
 import useHandleCartquantity from "../hooks/useHandleCartQuantity";
 import useAddToCartMain from "../hooks/addToCartMain";
 import { useRouter } from "next/navigation";
+import { useAuthModal } from "../(components)/authModal";
 
 function Cart() {
   const { deleteCartItem } = useDeleteCartItem();
@@ -22,6 +23,20 @@ function Cart() {
   const { addToCartWithVariants } = useAddToCartMain();
   const { handleCartQuantity, handleTotalPrice } = useHandleCartquantity();
   const [sortOption, setSortOption] = useState<string>("price_low_to_high");
+  const dispatch = useAppDispatch();
+  const { isAuthModalOpen, setIsAuthModalOpen } = useAuthModal();
+
+  useEffect(() => {
+    if (isAuthModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isAuthModalOpen, dispatch]);
 
   const cart = useAppSelector(
     (state) => state.global.isCartItemUnauthentificated
@@ -125,7 +140,7 @@ function Cart() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen lg:h-full pb-12">
+    <div className="min-h-screen relative lg:h-full pb-12">
       <div className="block lg:flex gap-2 h-full relative items-start">
         <div className="flex flex-col gap-4 ring-1 bg-gray-100 h-full min-h-1/2  w-full p-4 rounded-lg">
           <h1 className="text-3xl font-bold text-sky-700 tracking-wider">
@@ -236,12 +251,21 @@ function Cart() {
           <p className="text-green-600 flex gap-2">
             <Car /> უფასო მიწოდება თბილისის მასშტაბით{" "}
           </p>
-          <button
-            onClick={() => router.push("/chackout")}
-            className="flex p-4 mt-8 gap-4 bg-sky-400 font-semibold text-lg text-gray-900 tracking-wider hover:shadow-inner items-center justify-center ring-1 rounded-lg"
-          >
-            ყიდვა
-          </button>
+          {status === "authenticated" ? (
+            <button
+              onClick={() => router.push("/chackout")}
+              className="flex p-4 mt-8 gap-4 bg-sky-400 font-semibold text-lg text-gray-900 tracking-wider hover:shadow-inner items-center justify-center ring-1 rounded-lg"
+            >
+              ყიდვა
+            </button>
+          ) : (
+            <button
+              onClick={() => dispatch(setIsAuthModalOpen(true))}
+              className="flex p-4 mt-8 gap-4 bg-sky-400 font-semibold text-lg text-gray-900 tracking-wider hover:shadow-inner items-center justify-center ring-1 rounded-lg"
+            >
+              ყიდვა
+            </button>
+          )}
         </div>
       </div>
     </div>

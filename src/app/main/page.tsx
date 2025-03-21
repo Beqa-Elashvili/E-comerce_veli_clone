@@ -39,6 +39,7 @@ function Main() {
     const product = axios.get("/api/products");
     const categoryResp = axios.get("/api/categories?name=კაცის ტანსაცმელი");
     const categoryChildren = axios.get("/api/categories?childrens=true");
+    
     async function getProducts() {
       const resp = await Promise.all([product, categoryResp, categoryChildren]);
       setProducts(resp[0].data.products);

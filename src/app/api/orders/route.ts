@@ -45,6 +45,43 @@ export async function POST(req: NextRequest) {
         selectedColor: item.selectedColor || null,
         selectedSize: item.selectedSize || null,
       });
+    }
+
+    const order = await prisma.order.create({
+      data: {
+        orderNumber: `ORD-${Date.now()}`,
+        totalAmount,
+        userId,
+        status: "PENDING",
+        items: {
+          create: orderItems,
+        },
+        shippingAddressId: shippingAddress.id,
+      },
+    });
+
+    const payment = await prisma.payment.create({
+      data: {
+        orderId: order.id,
+        amount: order.totalAmount,
+        method: paymentMethod,
+        status: "PENDING",
+      },
+    });
+
+    // Here, simulate the payment processing and mark it as successful
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: "SUCCESS",
+      },
+    });
+
+    // After successful payment, update stock and change order status
+    for (const item of cartItems) {
+      const product = await prisma.product.findUnique({
+        where: { id: item.productId },
+      });
 
       if (item.selectedColor || item.selectedSize) {
         let colorId = null;
@@ -104,7 +141,7 @@ export async function POST(req: NextRequest) {
           },
         });
       } else {
-        if (product.stock < item.quantity) {
+        if (product && product.stock < item.quantity) {
           console.error(
             `Not enough stock for product ${item.productId}, this is base product`
           );
@@ -115,44 +152,15 @@ export async function POST(req: NextRequest) {
             { status: 400 }
           );
         }
-
-        await prisma.product.update({
-          where: { id: product.id },
-          data: {
-            stock: product.stock - item.quantity,
-          },
-        });
+        if (product)
+          await prisma.product.update({
+            where: { id: product.id },
+            data: {
+              stock: product.stock - item.quantity,
+            },
+          });
       }
     }
-
-    const order = await prisma.order.create({
-      data: {
-        orderNumber: `ORD-${Date.now()}`,
-        totalAmount,
-        userId,
-        status: "PENDING",
-        items: {
-          create: orderItems,
-        },
-        shippingAddressId: shippingAddress.id,
-      },
-    });
-
-    const payment = await prisma.payment.create({
-      data: {
-        orderId: order.id,
-        amount: order.totalAmount,
-        method: paymentMethod,
-        status: "PENDING",
-      },
-    });
-
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data: {
-        status: "SUCCESS",
-      },
-    });
 
     await prisma.order.update({
       where: { id: order.id },
@@ -180,6 +188,7 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
 export async function GET(req: NextRequest) {
   const session = await getSession();
 

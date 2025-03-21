@@ -1,19 +1,21 @@
 import { useSession } from "next-auth/react";
-import { useAppSelector } from "../redux";
+import { useAppDispatch, useAppSelector } from "../redux";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import useGetWishlistItems from "./getWislistItems";
+import { useAuthModal } from "../(components)/authModal";
 
 export default function useAddinWinshilst() {
-  const router = useRouter();
   const { getWishlistItems } = useGetWishlistItems();
   const { status } = useSession();
+  const { setIsAuthModalOpen } = useAuthModal();
+  const dispatch = useAppDispatch();
 
   const addWishlistItem = async (userId: string, productId: string) => {
     try {
       if (status === "unauthenticated") {
-        router.push("/authentification");
+        dispatch(setIsAuthModalOpen(true));
         return;
       }
       const resp = await axios.post("/api/wishlist", {

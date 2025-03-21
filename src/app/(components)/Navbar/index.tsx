@@ -42,17 +42,16 @@ import { setShowResults } from "@/redux/globalSlice";
 import { Package, MapPin } from "lucide-react";
 import { setIsAuthModalOpen } from "@/redux/globalSlice";
 import Register from "@/app/(auth)/authentification";
+import { useAuthModal } from "../authModal";
 
 const Navbar = () => {
   const { status } = useSession();
+  const { AuthModal, setIsAuthModalOpen, isAuthModalOpen } = useAuthModal();
   const dispatch = useAppDispatch();
   const pathname = usePathname();
   const router = useRouter();
   const { handleCartQuantity, handleTotalPrice } = useHandleCartquantity();
   const { handleQuantityIncart } = useHandleQuantityIncart();
-  const isAuthModalOpen = useAppSelector(
-    (state) => state.global.isAuthModalOpen
-  );
 
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
   const toggleTheme = () => {
@@ -65,7 +64,6 @@ const Navbar = () => {
     localStorage.removeItem("cart");
     signOut({ callbackUrl: "/" });
   };
-  const wishlist = useAppSelector((state) => state.global.isWishlist);
 
   const [value, setValue] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -104,7 +102,6 @@ const Navbar = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const userRef = useRef<HTMLInputElement>(null);
   const [showUser, setShowUser] = useState<boolean>(false);
-  const authRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -161,31 +158,6 @@ const Navbar = () => {
       document.body.style.overflow = "auto";
     };
   }, [cart, showCart]);
-
-  useEffect(() => {
-    if (isAuthModalOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (authRef.current) {
-        if (!authRef.current.contains(event.target as Node)) {
-          dispatch(setIsAuthModalOpen(false));
-        }
-      }
-    };
-
-    if (isAuthModalOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = "auto";
-    };
-  }, [isAuthModalOpen, dispatch]);
 
   useEffect(() => {
     if (showUser) {
@@ -311,37 +283,15 @@ const Navbar = () => {
     router.push(href);
   };
 
-  const handleIsAuthentificated = user ? "/chackout" : "/authentification";
+  const handleIsAuthentificated = () => {
+    user ? "/chackout" : dispatch(setIsAuthModalOpen(true));
+  };
 
   return (
     <div
       className={`flex sticky top-0 z-40 justify-between gap-12 bg-main py-4 px-2 lg:px-8 xl:px-40 items-center w-full mb-7`}
     >
-      <div
-        ref={authRef}
-        className={` ${
-          isAuthModalOpen ? "block" : "hidden"
-        } fixed bg-gray-800 inset-0 z-40 h-full bg-opacity-60`}
-      >
-        {isAuthModalOpen && (
-          <div className="absolute inset-0 top-12">
-            {isAuthModalOpen && <Register />}
-          </div>
-        )}
-      </div>
-
-      <div
-        ref={searchRef}
-        className={` ${
-          showResults ? "block" : "hidden"
-        } fixed bg-gray-800 inset-0 z-30 h-full bg-opacity-60`}
-      ></div>
-      <div
-        ref={cartRef}
-        className={` ${
-          showCart ? "block" : "hidden"
-        } fixed bg-gray-800 inset-0  z-30 h-full bg-opacity-60`}
-      ></div>
+      <AuthModal />
       <div
         ref={userRef}
         className={` ${
@@ -525,9 +475,7 @@ const Navbar = () => {
                               ნახვა ({cart?.length})
                             </button>
                             <button
-                              onClick={() =>
-                                router.push(handleIsAuthentificated)
-                              }
+                              onClick={() => handleIsAuthentificated()}
                               className="flex bg-green-400 hover:bg-green-500 transition duration-300 justify-center p-2 items-center rounded-lg"
                             >
                               ყიდვა
