@@ -254,7 +254,7 @@ function Cart() {
             ))}
           </div>
         </div>
-        <div className="sticky top-7 mt-2 lg:mt-0  flex flex-col gap-5 w-full lg:w-1/2 rounded-lg p-6">
+        <div className="sticky md:border top-7 mt-2 lg:mt-0  flex flex-col gap-5 w-full lg:w-1/2 rounded-lg p-6">
           <h1 className="text-2xl font-bold">შეკვეთა</h1>
           <div className="flex justify-between">
             <p className="text-sm">პროდუქტები</p>

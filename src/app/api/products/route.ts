@@ -21,18 +21,19 @@ export async function POST(req: NextRequest) {
           stock,
           categoryId,
           images = [],
-          variants = [], // Variants with color-size combinations
-          sizes = [], // Sizes array passed for direct creation
-          colors = [], // Colors array passed for direct creation
+          variants = [],
+          sizes = [],
+          colors = [],
         } = product;
 
-        // Create the product
+        const productStock = variants.length > 0 ? null : stock;
+
         const createdProduct = await prisma.product.create({
           data: {
             name,
             description,
             price,
-            stock,
+            stock: productStock,
             categoryId,
             images: {
               create: images.map((url: string) => ({ url })),
@@ -43,40 +44,34 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // Case when both colors and sizes are provided
         if (colors.length > 0 && sizes.length > 0) {
           await Promise.all(
             variants.map(async (variant: any) => {
               const { colorName, sizeName, variantStock } = variant;
 
-              // Handle color upsert
               const color = await prisma.color.upsert({
                 where: { name: colorName },
                 update: {},
                 create: { name: colorName },
               });
 
-              // Handle size upsert
               const size = await prisma.size.upsert({
                 where: { name: sizeName },
                 update: {},
                 create: { name: sizeName },
               });
 
-              // Create product variant
               await prisma.productVariant.create({
                 data: {
                   productId: createdProduct.id,
                   colorId: color.id,
                   sizeId: size.id,
-                  stock: variantStock || stock, // Use variant stock, fallback to product stock
+                  stock: variantStock || stock,
                 },
               });
             })
           );
-        }
-        // Case when only colors are provided (without sizes)
-        else if (colors.length > 0 && sizes.length === 0) {
+        } else if (colors.length > 0 && sizes.length === 0) {
           await Promise.all(
             colors.map(async (colorName: string) => {
               const { variantStock } =
@@ -87,7 +82,6 @@ export async function POST(req: NextRequest) {
                 create: { name: colorName },
               });
 
-              // Create product variant for color only
               await prisma.productVariant.create({
                 data: {
                   productId: createdProduct.id,
@@ -97,9 +91,7 @@ export async function POST(req: NextRequest) {
               });
             })
           );
-        }
-        // Case when only sizes are provided (without colors)
-        else if (sizes.length > 0 && colors.length === 0) {
+        } else if (sizes.length > 0 && colors.length === 0) {
           await Promise.all(
             sizes.map(async (sizeName: string) => {
               const { variantStock } =
@@ -268,10 +260,7 @@ export async function GET(req: NextRequest) {
 }
 export async function DELETE(req: NextRequest) {
   try {
-    // Delete all product variants
     await prisma.productVariant.deleteMany({});
-
-    // Delete all products
     await prisma.product.deleteMany({});
 
     return NextResponse.json(

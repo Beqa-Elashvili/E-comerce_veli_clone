@@ -86,6 +86,7 @@ function ProductId({ params }: ProductIdProps) {
         !avaliable.selectedColor) &&
       (item.sizeName === avaliable.selectedSize || !avaliable.selectedSize)
   );
+  console.log(stock);
 
   const handleQuantityIncart = (id: number) => {
     if (status === "unauthenticated") {
@@ -231,7 +232,9 @@ function ProductId({ params }: ProductIdProps) {
 
   const buy = () => {
     if (status === "authenticated") {
-      handleAddToCart();
+      if (cart?.length === 0) {
+        handleAddToCart();
+      }
       router.push("/chackout");
     } else {
       dispatch(setIsAuthModalOpen(true));
@@ -310,7 +313,8 @@ function ProductId({ params }: ProductIdProps) {
             </h2>
             <hr />
             <div>
-              {(stock && stock?.stock <= 0) || product.stock <= 0 ? (
+              {(product.variants.length > 0 && !stock) ||
+              (product.stock && product.stock === 0) ? (
                 <h1 className="text-red-500">მარაგი ამოიწურა</h1>
               ) : (
                 <h1 className="text-sky-700">მარაგშია</h1>
@@ -397,7 +401,8 @@ function ProductId({ params }: ProductIdProps) {
           <h1 className="flex gap-2">
             მარაგშია
             <p className="font-semibold">
-              {stock ? stock.stock : product.stock}
+              {product.variants.length > 0 && !stock && 0}
+              {stock ? stock.stock || 0 : product.stock}
             </p>
             ცალი
           </h1>
