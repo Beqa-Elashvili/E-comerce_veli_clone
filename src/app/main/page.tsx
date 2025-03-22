@@ -9,7 +9,7 @@ import useAddToCartMain from "../hooks/addToCartMain";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import CarouselComp from "../(components)/Carousel/Carousel";
-import { TableOfContents, X, Flame } from "lucide-react";
+import { TableOfContents,  Flame } from "lucide-react";
 import { setIsAllCategories } from "@/redux/categorySlice";
 
 function Main() {

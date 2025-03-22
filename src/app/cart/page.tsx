@@ -142,22 +142,26 @@ function Cart() {
   return (
     <div className="min-h-screen relative lg:h-full pb-12">
       <div className="block lg:flex gap-2 h-full relative items-start">
-        <div className="flex flex-col gap-4 ring-1 bg-gray-100 h-full min-h-1/2  w-full p-4 rounded-lg">
-          <h1 className="text-3xl font-bold text-sky-700 tracking-wider">
-            თქვენი კალათა
+        <div className="flex flex-col gap-4  bg-gray-100 h-full min-h-1/2  w-full p-4 rounded-xl">
+          <h1 className="text-3xl font-bold text-black tracking-wider">
+            {!cart || cart.length === 0 ? (
+              <>კალათა ცარიელია</>
+            ) : (
+              <>თქვენი კალათა</>
+            )}
           </h1>
           <div>
             <Select
               id="sort-options"
               onChange={(e) => setSortOption(e)}
-              defaultValue={"ფასი (დაბლიდან - მაღლა)"}
+              defaultValue={"ფასი (ზრდადობით)"}
               className="bg-sky-500 min-w-60 rounded-lg text-white outline-none border-0"
             >
               <Select.Option value="price_low_to_high">
-                ფასი (დაბლიდან - მაღლა)
+                ფასი (ზრდადობით)
               </Select.Option>
               <Select.Option value="price_high_to_low">
-                ფასი (მაღლიდან - დაბლა)
+                ფასი (კლებადობით)
               </Select.Option>
               <Select.Option value="name_a_to_z">სახელი (A - Z)</Select.Option>
               <Select.Option value="name_z_to_a">სახელი (Z - A)</Select.Option>
@@ -166,7 +170,19 @@ function Cart() {
           <hr className="border-sky-200 border-px" />
           <div className="flex flex-col gap-2">
             {(!cart || cart?.length === 0) && (
-              <h1 className="text-6xl text-gray-500">თქვენი კალათა ცარიელია</h1>
+              <div className="flex items-center justify-between">
+                <img
+                  className="size-14 md:size-20 lg:size-40 "
+                  src="/empty-box.webp"
+                  alt="empty-box"
+                />
+                <h1
+                  onClick={() => router.push("/")}
+                  className="text-xl cursor-pointer text-gray-500"
+                >
+                  მთავარზე დაბრუნება
+                </h1>
+              </div>
             )}
             {sortCart(sortOption).map((item: Product, index: number) => (
               <div key={index}>
@@ -238,7 +254,7 @@ function Cart() {
             ))}
           </div>
         </div>
-        <div className="ring-1 sticky top-7 mt-2 lg:mt-0  flex flex-col gap-5 w-full lg:w-1/2 rounded-lg p-6">
+        <div className="sticky top-7 mt-2 lg:mt-0  flex flex-col gap-5 w-full lg:w-1/2 rounded-lg p-6">
           <h1 className="text-2xl font-bold">შეკვეთა</h1>
           <div className="flex justify-between">
             <p className="text-sm">პროდუქტები</p>
@@ -251,21 +267,23 @@ function Cart() {
           <p className="text-green-600 flex gap-2">
             <Car /> უფასო მიწოდება თბილისის მასშტაბით{" "}
           </p>
-          {status === "authenticated" ? (
-            <button
-              onClick={() => router.push("/chackout")}
-              className="flex p-4 mt-8 gap-4 bg-sky-400 font-semibold text-lg text-gray-900 tracking-wider hover:shadow-inner items-center justify-center ring-1 rounded-lg"
-            >
-              ყიდვა
-            </button>
-          ) : (
-            <button
-              onClick={() => dispatch(setIsAuthModalOpen(true))}
-              className="flex p-4 mt-8 gap-4 bg-sky-400 font-semibold text-lg text-gray-900 tracking-wider hover:shadow-inner items-center justify-center ring-1 rounded-lg"
-            >
-              ყიდვა
-            </button>
-          )}
+          <div className={`w-full ${!cart || (cart.length === 0 && "hidden")}`}>
+            {status === "authenticated" ? (
+              <button
+                onClick={() => router.push("/chackout")}
+                className="flex p-4 w-full mt-8 gap-4 bg-black text-white font-semibold text-lg  tracking-wider hover:shadow-inner items-center justify-center rounded-lg"
+              >
+                ყიდვა
+              </button>
+            ) : (
+              <button
+                onClick={() => dispatch(setIsAuthModalOpen(true))}
+                className="flex p-4 mt-8 w-full gap-4 bg-black text-white font-semibold text-lg tracking-wider hover:shadow-inner items-center justify-center rounded-lg"
+              >
+                ყიდვა
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

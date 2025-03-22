@@ -263,7 +263,7 @@ const Navbar = () => {
 
   const handleScroll = () => {
     const scrollTop = window.scrollY;
-    if (scrollTop > 400) {
+    if (scrollTop > 100) {
       setIsSticky(true);
     } else {
       setIsSticky(false);
@@ -292,6 +292,18 @@ const Navbar = () => {
       className={`flex sticky top-0 z-40 justify-between gap-12 bg-main py-4 px-2 lg:px-8 xl:px-40 items-center w-full mb-7`}
     >
       <AuthModal />
+      <div
+        ref={searchRef}
+        className={` ${
+          showResults ? "block" : "hidden"
+        } fixed bg-gray-800 inset-0 z-30 h-full bg-opacity-60`}
+      ></div>
+      <div
+        ref={cartRef}
+        className={` ${
+          showCart ? "block" : "hidden"
+        } fixed bg-gray-800 inset-0  z-30 h-full bg-opacity-60`}
+      ></div>
       <div
         ref={userRef}
         className={` ${
@@ -582,12 +594,12 @@ const Navbar = () => {
         <div
           className={`absolute hidden lg:block inset-0 ${
             isSticky ? "pointer-events-auto" : "pointer-events-none"
-          }  top-20 px-4 lg:px-8 xl:px-40`}
+          }  top-16 px-4 lg:px-8 xl:px-40`}
         >
           <div
             className={`bg-gray-50 z-20 sticky top-20 items-center text-center overflow-hidden w-full gap-2 transition-all duration-500 ease-in-out ${
               isSticky
-                ? "opacity-100 flex pointer-events-auto translate-y-0"
+                ? "opacity-100 flex pointer-events-auto translate-y-4"
                 : "opacity-0 flex pointer-events-none"
             }`}
           >

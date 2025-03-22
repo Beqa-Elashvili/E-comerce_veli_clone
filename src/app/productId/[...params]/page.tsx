@@ -6,7 +6,7 @@ import axios from "axios";
 import Link from "next/link";
 import { Heart, IdCard } from "lucide-react";
 import useAddinWinshilst from "@/app/hooks/addWishlistItem";
-import { useAppSelector } from "@/app/redux";
+import { useAppDispatch, useAppSelector } from "@/app/redux";
 import useGetIsWishlist from "@/app/actions/getIswishlist";
 import { Truck, ShoppingCart } from "lucide-react";
 import useAddToCart from "@/app/hooks/addToCart";
@@ -15,6 +15,9 @@ import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import { GridLoader } from "react-spinners";
 import { useRouter } from "next/navigation";
+import CarouselComp from "@/app/(components)/Carousel/Carousel";
+import useAddToCartMain from "@/app/hooks/addToCartMain";
+import { setIsAuthModalOpen } from "@/redux/globalSlice";
 
 type ProductIdProps = {
   params: Promise<{
@@ -35,6 +38,7 @@ function ProductId({ params }: ProductIdProps) {
   const user = useAppSelector((state) => state.user.user);
   const { params: routeParams } = use(params);
   const [id] = routeParams || [];
+  const { addToCartWithVariants } = useAddToCartMain();
   const cart = useAppSelector(
     (state) => state.global.isCartItemUnauthentificated
   );
@@ -52,7 +56,6 @@ function ProductId({ params }: ProductIdProps) {
           `/api/categories?name=${resp.data.product.category.name}`
         );
         setSupportProducts(respCart.data.category.Product);
-        console.log(respCart);
         setProduct(resp.data.product);
         setImageUrl(resp.data.product?.images[0].url);
         setLoading(false);
@@ -224,14 +227,27 @@ function ProductId({ params }: ProductIdProps) {
     }
   };
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const buy = () => {
-    handleAddToCart();
-    router.push("/chackout");
+    if (status === "authenticated") {
+      handleAddToCart();
+      router.push("/chackout");
+    } else {
+      dispatch(setIsAuthModalOpen(true));
+    }
+  };
+
+  const handleIsCart = (id: number) => {
+    return (
+      cart?.some((item: Product) =>
+        status === "authenticated" ? item.productId === id : item.id === id
+      ) || false
+    );
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full pb-12">
       <div className="w-full flex justify-end">
         <div
           onClick={() =>
@@ -417,14 +433,93 @@ function ProductId({ params }: ProductIdProps) {
             კალათაში დამატება
           </button>
           <button
-            onClick={() => buy}
+            onClick={() => buy()}
             className="flex p-4 mt-2 gap-4 bg-black font-semibold text-white tracking-wider hover:shadow-inner items-center justify-center ring-1 rounded-lg"
           >
             ყიდვა
           </button>
-          <div></div>
         </div>
       </div>
+      <CarouselComp MainTitle="მსგავსი პროდუქტები">
+        {supportProducts?.map((product: Product) => {
+          const isCart = handleIsCart(product.id);
+          return (
+            <div key={product.id} className="px-2 w-full md:px-4">
+              <div
+                onClick={() => router.push(`/productId/${product.id}`)}
+                className="rounded-lg h-[240px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+              >
+                <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
+                  <div className="flex flex-col items-center gap-2 ">
+                    <Heart
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addWishlistItem(
+                          user?.id as unknown as string,
+                          product.id as unknown as string
+                        );
+                      }}
+                      className={`w-8 h-8  ${
+                        IsWishlist(product.id) && "fill-red-500 text-red-500"
+                      }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
+                    />
+                    <ShoppingCart
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCartWithVariants(product);
+                      }}
+                      className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                    />
+                  </div>
+                </div>
+                <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
+                  <p className="text-balance py-2 text-sm font-semibold text-gray-900">
+                    {product.name}
+                  </p>
+                  <img
+                    className="h-20 md:h-40 m-auto object-cover"
+                    src={product.images[0].url}
+                    alt="image"
+                  />
+                  {isCart && (
+                    <div className="hidden md:flex gap-2">
+                      <ShoppingCart className="text-green-500 fill-green-200" />
+                      <p className="text-sm">დამატებულია</p>
+                    </div>
+                  )}
+                  <div className="text-start md:h-20 mt-2">
+                    <p className="font-semibold text-sm">{product.price} ₾</p>
+                    <p className="text-sm h-10 w-28 hidde md:block mt-2">
+                      {product.description?.slice(0, 20)}...
+                    </p>
+                  </div>
+                </div>
+                <div className="flex w-full justify-between md:hidden">
+                  <Heart
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addWishlistItem(
+                        user?.id as unknown as string,
+                        product.id as unknown as string
+                      );
+                    }}
+                    className={`w-8 h-8  ${
+                      IsWishlist(product.id) && "fill-red-500 text-red-500"
+                    }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
+                  />
+                  <ShoppingCart
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToCartWithVariants(product);
+                    }}
+                    className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </CarouselComp>
     </div>
   );
 }

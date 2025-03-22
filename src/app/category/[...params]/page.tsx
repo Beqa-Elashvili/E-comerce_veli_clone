@@ -8,7 +8,9 @@ import { Heart, ShoppingCart } from "lucide-react";
 import useAddinWinshilst from "@/app/hooks/addWishlistItem";
 import { useAppSelector } from "@/app/redux";
 import useAddToCartMain from "@/app/hooks/addToCartMain";
-import { Frown } from "lucide-react";
+import { Frown, ChevronLeft } from "lucide-react";
+import useGetIsWishlist from "@/app/actions/getIswishlist";
+import { useSession } from "next-auth/react";
 
 type CategorysProps = {
   params: Promise<{
@@ -19,12 +21,17 @@ type CategorysProps = {
 function Categorys({ params }: CategorysProps) {
   const { params: routeParams } = use(params);
   const [name, name2] = routeParams || [];
+  const { status } = useSession();
+
   const [products, setProducts] = useState<Item>();
   const { addWishlistItem } = useAddinWinshilst();
   const { addToCartWithVariants } = useAddToCartMain();
+  const { IsWishlist } = useGetIsWishlist();
 
-  const wishlist = useAppSelector((state) => state.global.isWishlist);
   const user = useAppSelector((state) => state.user.user);
+  const cart = useAppSelector(
+    (state) => state.global.isCartItemUnauthentificated
+  );
 
   const router = useRouter();
 
@@ -63,8 +70,28 @@ function Categorys({ params }: CategorysProps) {
       child?.children?.flatMap((item) => item.Product)
     ) || [];
 
+  const handleIsCart = (id: number) => {
+    return (
+      cart?.some((item: Product) =>
+        status === "authenticated" ? item.productId === id : item.id === id
+      ) || false
+    );
+  };
+
   return (
     <div className="w-full min-h-screen">
+      <div className="block lg:hidden">
+        <div className="w-full flex  items-center">
+          <ChevronLeft
+            onClick={() => router.back()}
+            className="cursor-pointer"
+          />
+          <h1 className="flex justify-center font-semibold text-xl mr-5 w-full">
+            {name2 ? <>{categoryName2}</> : <>{categoryName}</>}
+          </h1>
+        </div>
+        <hr className="my-2" />
+      </div>
       <div className="flex gap-20">
         <div className="pr-2 hidden md:block border-r-2 h-full min-h-screen">
           <h1 className="font-bold text-2xl mb-4">{products?.name}</h1>
@@ -112,6 +139,7 @@ function Categorys({ params }: CategorysProps) {
                           }}
                           className={`w-8 h-8   cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
                         />
+
                         <ShoppingCart
                           onClick={(e) => {
                             e.stopPropagation();
@@ -168,11 +196,11 @@ function Categorys({ params }: CategorysProps) {
             <>
               {products?.Product.length === 0 &&
                 productsListfull.length === 0 && (
-                  <div className="w-full flex mt-12 items-center justify-center gap-2">
-                    <h1 className="font-semibold text-3xl">
+                  <div className="w-full  text-center space-y-4  md:flex mt-12 items-center justify-center gap-2">
+                    <h1 className="font-semibold w-full text-3xl">
                       პროდუქტები ვერ მოიძებნა
                     </h1>
-                    <Frown className="text-yellow-600 size-12 fill-yellow-300" />
+                    <Frown className="text-yellow-600 text-center w-full size-12 fill-yellow-300" />
                   </div>
                 )}
               <div className="grid grid-cols-3 md:grid-cols-4 mt-12 pb-4 w-full justify-between gap-2 gap-y-4">
@@ -181,16 +209,20 @@ function Categorys({ params }: CategorysProps) {
                     {productsListfull.length !== 0 && (
                       <>
                         {productsListfull.map((product: Product) => {
+                          const isCart = handleIsCart(product.id);
                           return (
-                            <div key={product.id} className="px-2 z-0">
+                            <div
+                              key={product.id}
+                              className="px-2 w-full md:px-4"
+                            >
                               <div
                                 onClick={() =>
                                   router.push(`/productId/${product.id}`)
                                 }
-                                className="rounded-lg p-2 hover:bg-gray-100 relative text-center h-full overflow-hidden cursor-pointer max-w-52"
+                                className="rounded-lg h-[240px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
                               >
-                                <div className="absolute inset-0 opacity-0 flex  gap-2 hover:opacity-100 items-center justify-end transition  duration-500 hover:-translate-x-5">
-                                  <div className="flex flex-col items-center gap-2">
+                                <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
+                                  <div className="flex flex-col items-center gap-2 ">
                                     <Heart
                                       onClick={(e) => {
                                         e.stopPropagation();
@@ -200,10 +232,8 @@ function Categorys({ params }: CategorysProps) {
                                         );
                                       }}
                                       className={`w-8 h-8  ${
-                                        wishlist?.find(
-                                          (item) =>
-                                            item.productId === product.id
-                                        ) && "fill-red-500 text-red-500"
+                                        IsWishlist(product.id) &&
+                                        "fill-red-500 text-red-500"
                                       }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
                                     />
                                     <ShoppingCart
@@ -215,23 +245,51 @@ function Categorys({ params }: CategorysProps) {
                                     />
                                   </div>
                                 </div>
-                                <div className="hover:bg-gray-100 overflow-hidden rounded-lg">
-                                  <p className="text-balance py-2">
+                                <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
+                                  <p className="text-balance py-2 text-sm font-semibold text-gray-900">
                                     {product.name}
                                   </p>
                                   <img
-                                    className="h-40 m-auto object-contain"
+                                    className="h-20 md:h-40 m-auto object-cover"
                                     src={product.images[0].url}
                                     alt="image"
                                   />
-                                  <div className="text-start">
-                                    <p className="font-semibold">
-                                      {product.price} &#8382;
+                                  {isCart && (
+                                    <div className="hidden md:flex gap-2">
+                                      <ShoppingCart className="text-green-500 fill-green-200" />
+                                      <p className="text-sm">დამატებულია</p>
+                                    </div>
+                                  )}
+                                  <div className="text-start md:h-20 mt-2">
+                                    <p className="font-semibold text-sm">
+                                      {product.price} ₾
                                     </p>
-                                    <p className="text-sm mt-2">
+                                    <p className="text-sm h-10 w-28 hidde md:block mt-2">
                                       {product.description?.slice(0, 20)}...
                                     </p>
                                   </div>
+                                </div>
+                                <div className="flex w-full justify-between md:hidden">
+                                  <Heart
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addWishlistItem(
+                                        user?.id as unknown as string,
+                                        product.id as unknown as string
+                                      );
+                                    }}
+                                    className={`w-8 h-8  ${
+                                      IsWishlist(product.id) &&
+                                      "fill-red-500 text-red-500"
+                                    }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
+                                  />
+                                  <ShoppingCart
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addToCartWithVariants(product);
+                                    }}
+                                    className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                                  />
                                 </div>
                               </div>
                             </div>
