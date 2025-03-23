@@ -43,10 +43,8 @@ function CarouselComp({
       setWindowWidth(window.innerWidth);
     };
 
-    // Add event listener to resize
     window.addEventListener("resize", handleResize);
 
-    // Cleanup the event listener
     return () => {
       window.removeEventListener("resize", handleResize);
     };
@@ -54,13 +52,13 @@ function CarouselComp({
 
   useEffect(() => {
     if (windowWidth >= 1200) {
-      setSlidesToShow(6); // Large screens
+      setSlidesToShow(6); 
     } else if (windowWidth >= 992) {
-      setSlidesToShow(5); // Medium screens
+      setSlidesToShow(5); 
     } else if (windowWidth >= 768) {
-      setSlidesToShow(5); // Small screens
+      setSlidesToShow(5); 
     } else {
-      setSlidesToShow(3); // Mobile screens
+      setSlidesToShow(3); 
     }
   }, [windowWidth]);
 

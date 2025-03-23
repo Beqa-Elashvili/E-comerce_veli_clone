@@ -16,14 +16,16 @@ import { useRouter } from "next/navigation";
 import { useAuthModal } from "../(components)/authModal";
 
 function Cart() {
+  const { status } = useSession();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
   const { deleteCartItem } = useDeleteCartItem();
   const { handleQuantityIncart } = useHandleQuantityIncart();
   const { addToCart, loadingStates, setLoadingStates } = useAddToCart();
-  const { status } = useSession();
   const { addToCartWithVariants } = useAddToCartMain();
   const { handleCartQuantity, handleTotalPrice } = useHandleCartquantity();
   const [sortOption, setSortOption] = useState<string>("price_low_to_high");
-  const dispatch = useAppDispatch();
   const { isAuthModalOpen, setIsAuthModalOpen } = useAuthModal();
 
   useEffect(() => {
@@ -136,8 +138,6 @@ function Cart() {
     sortCart(sortOption);
   }, [sortOption, cart]);
 
-  const router = useRouter();
-
   return (
     <div className="min-h-screen relative lg:h-full pb-12">
       <div className="block lg:flex gap-2 h-full relative items-start">
@@ -183,74 +183,80 @@ function Cart() {
                 </h1>
               </div>
             )}
-            {sortCart(sortOption).map((item: Product, index: number) => (
-              <div key={index}>
-                <div className="p-4 flex gap-2">
-                  <img
-                    src={item.images[0].url || ""}
-                    className="w-24 h-24 object-contaion"
-                    alt="image"
-                  />
-                  <div className="block lg:flex justify-between w-full gap-2">
-                    <div>
-                      <h1 className="text-xl max-w-20 ">{item.name}</h1>
-                      <p className="text-sm md:w-40">{item.description}</p>
-                      <div className="flex gap-2 mt-2">
-                        {(item.selectedColor || item.selectedSize) && (
+            {sortCart(sortOption).map((item: Product, index: number) => {
+              const IsUser = user ? item.productId : item.id;
+              return (
+                <div key={index}>
+                  <div className="p-4 flex gap-2">
+                    <img
+                      onClick={() => router.push(`/productId/${IsUser}`)}
+                      src={item.images[0].url || ""}
+                      className="w-24 rounded-xl h-24 object-contaion"
+                      alt="image"
+                    />
+                    <div className="block lg:flex justify-between w-full gap-2">
+                      <div>
+                        <h1 className="text-xl max-w-20 ">{item.name}</h1>
+                        <p className="text-sm md:w-40">{item.description}</p>
+                        <div className="flex gap-2 mt-2">
+                          {(item.selectedColor || item.selectedSize) && (
+                            <>
+                              {item.selectedColor && (
+                                <p className="bg-sky-200 rounded-lg p-2 min-w-12 text-center">
+                                  {item.selectedColor}
+                                </p>
+                              )}
+                              {item.selectedSize && (
+                                <p className="bg-sky-200 rounded-lg p-2 min-w-12 text-center">
+                                  {item.selectedSize}
+                                </p>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-start my-2 lg:my-0 lg:justify-center gap-4">
+                        <div
+                          onClick={() => handleAddToCart(item)}
+                          className="h-8 w-8 cursor-pointer hover:bg-gray-200 rounded-full border flex items-center justify-center"
+                        >
+                          +
+                        </div>
+                        {loadingStates[
+                          status === "unauthenticated"
+                            ? item.id
+                            : item.productId
+                        ] ? (
                           <>
-                            {item.selectedColor && (
-                              <p className="bg-sky-200 rounded-lg p-2 min-w-12 text-center">
-                                {item.selectedColor}
-                              </p>
-                            )}
-                            {item.selectedSize && (
-                              <p className="bg-sky-200 rounded-lg p-2 min-w-12 text-center">
-                                {item.selectedSize}
-                              </p>
-                            )}
+                            <GridLoader
+                              color="#525fd16c"
+                              size={4}
+                              className="w-6"
+                            />
                           </>
+                        ) : (
+                          <h1>{handleQuantityIncart(item)}</h1>
                         )}
+                        <div
+                          onClick={() => handleCartItemId(item)}
+                          className="h-8 w-8 cursor-pointer hover:bg-gray-200 rounded-full border flex items-center justify-center"
+                        >
+                          -
+                        </div>
+                        <button
+                          className="hover:text-gray-600"
+                          onClick={() => deleteCartItem(item, false)}
+                        >
+                          <Trash />
+                        </button>
                       </div>
+                      <h1 className="text-xl font-bold">{item.price} ₾</h1>
                     </div>
-                    <div className="flex items-center justify-start my-2 lg:my-0 lg:justify-center gap-4">
-                      <div
-                        onClick={() => handleAddToCart(item)}
-                        className="h-8 w-8 cursor-pointer hover:bg-gray-200 rounded-full border flex items-center justify-center"
-                      >
-                        +
-                      </div>
-                      {loadingStates[
-                        status === "unauthenticated" ? item.id : item.productId
-                      ] ? (
-                        <>
-                          <GridLoader
-                            color="#525fd16c"
-                            size={4}
-                            className="w-6"
-                          />
-                        </>
-                      ) : (
-                        <h1>{handleQuantityIncart(item)}</h1>
-                      )}
-                      <div
-                        onClick={() => handleCartItemId(item)}
-                        className="h-8 w-8 cursor-pointer hover:bg-gray-200 rounded-full border flex items-center justify-center"
-                      >
-                        -
-                      </div>
-                      <button
-                        className="hover:text-gray-600"
-                        onClick={() => deleteCartItem(item, false)}
-                      >
-                        <Trash />
-                      </button>
-                    </div>
-                    <h1 className="text-xl font-bold">{item.price} ₾</h1>
                   </div>
+                  <hr />
                 </div>
-                <hr />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
         <div className="sticky md:border top-7 mt-2 lg:mt-0  flex flex-col gap-5 w-full lg:w-1/2 rounded-lg p-6">

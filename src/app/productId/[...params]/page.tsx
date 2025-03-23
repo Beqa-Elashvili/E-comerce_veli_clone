@@ -36,12 +36,16 @@ function ProductId({ params }: ProductIdProps) {
   const [product, setProduct] = useState<Product>();
   const [supportProducts, setSupportProducts] = useState<Product[]>([]);
   const user = useAppSelector((state) => state.user.user);
-  const { params: routeParams } = use(params);
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { params: routeParams } = React.use(params);
   const [id] = routeParams || [];
+
   const { addToCartWithVariants } = useAddToCartMain();
   const cart = useAppSelector(
     (state) => state.global.isCartItemUnauthentificated
   );
+  console.log(supportProducts);
 
   const [avaliable, setAvalible] = useState({
     selectedColor: "",
@@ -51,14 +55,16 @@ function ProductId({ params }: ProductIdProps) {
   useEffect(() => {
     async function getProduct() {
       try {
-        const resp = await axios.get(`/api/products?id=${id}`);
-        const respCart = await axios.get(
-          `/api/categories?name=${resp.data.product.category.name}`
-        );
-        setSupportProducts(respCart.data.category.Product);
-        setProduct(resp.data.product);
-        setImageUrl(resp.data.product?.images[0].url);
-        setLoading(false);
+        if (id) {
+          const resp = await axios.get(`/api/products?id=${id}`);
+          const respCart = await axios.get(
+            `/api/categories?name=${resp.data.product.category.name}`
+          );
+          setSupportProducts(respCart.data.category.Product);
+          setProduct(resp.data.product);
+          setImageUrl(resp.data.product?.images[0].url);
+          setLoading(false);
+        }
       } catch (error) {
         console.log(error);
       } finally {
@@ -68,7 +74,7 @@ function ProductId({ params }: ProductIdProps) {
     getProduct();
   }, [id]);
 
-  if (loading) return <div>..Loading</div>;
+  if (loading) return <div className="min-h-screen">..Loading</div>;
   if (!product) return <div>laod product</div>;
 
   const variantDetails = product.variants.map((variant) => {
@@ -86,7 +92,6 @@ function ProductId({ params }: ProductIdProps) {
         !avaliable.selectedColor) &&
       (item.sizeName === avaliable.selectedSize || !avaliable.selectedSize)
   );
-  console.log(stock);
 
   const handleQuantityIncart = (id: number) => {
     if (status === "unauthenticated") {
@@ -117,6 +122,7 @@ function ProductId({ params }: ProductIdProps) {
       }
     }
   };
+
   const handleCartItemId = async (id: number) => {
     if (status === "unauthenticated") {
       setLoadingStates((prev) => ({
@@ -227,8 +233,6 @@ function ProductId({ params }: ProductIdProps) {
       addToCart(user?.id as unknown as string, product, 1);
     }
   };
-  const router = useRouter();
-  const dispatch = useAppDispatch();
 
   const buy = () => {
     if (status === "authenticated") {
@@ -294,7 +298,11 @@ function ProductId({ params }: ProductIdProps) {
               ))}
             </div>
             {imgUrl && (
-              <img className="min-w-80 object-cover" src={imgUrl} alt="image" />
+              <img
+                className="min-w-80 rounded-xl ml-2 mt-2 md:mt-0 object-cover"
+                src={imgUrl}
+                alt="image"
+              />
             )}
           </div>
           <div className="flex flex-col w-full gap-2">
@@ -448,9 +456,92 @@ function ProductId({ params }: ProductIdProps) {
       <div
         className={`${
           supportProducts && supportProducts.length !== 0 ? "block" : "hidden"
-        }`}
+        } my-2 `}
       >
-        <CarouselComp MainTitle="მსგავსი პროდუქტები">
+        <h1 className="py-2 text-2xl font-semibold">
+          მასთან ერთად გამოგადგება
+        </h1>
+        <div className="flex flex-wrap justify-center md:justify-start gap-2">
+          {supportProducts?.map((product: Product) => {
+            const isCart = handleIsCart(product.id);
+            return (
+              <div key={product.id} className="px-2 min-w-40 md:px-4">
+                <div
+                  onClick={() => router.push(`/productId/${product.id}`)}
+                  className="rounded-lg h-[240px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+                >
+                  <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
+                    <div className="flex flex-col items-center gap-2 ">
+                      <Heart
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addWishlistItem(
+                            user?.id as unknown as string,
+                            product.id as unknown as string
+                          );
+                        }}
+                        className={`w-8 h-8  ${
+                          IsWishlist(product.id) && "fill-red-500 text-red-500"
+                        }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
+                      />
+                      <ShoppingCart
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCartWithVariants(product);
+                        }}
+                        className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
+                    <p className="text-balance py-2 text-sm font-semibold text-gray-900">
+                      {product.name}
+                    </p>
+                    <img
+                      className="h-20 md:h-40 m-auto object-cover"
+                      src={product.images[0].url}
+                      alt="image"
+                    />
+                    {isCart && (
+                      <div className="hidden md:flex gap-2">
+                        <ShoppingCart className="text-green-500 fill-green-200" />
+                        <p className="text-sm">დამატებულია</p>
+                      </div>
+                    )}
+                    <div className="text-start md:h-20 mt-2">
+                      <p className="font-semibold text-sm">{product.price} ₾</p>
+                      <p className="text-sm h-10 mt-2">
+                        {product.description?.slice(0, 20)}...
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex w-full justify-between md:hidden">
+                    <Heart
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addWishlistItem(
+                          user?.id as unknown as string,
+                          product.id as unknown as string
+                        );
+                      }}
+                      className={`w-8 h-8  ${
+                        IsWishlist(product.id) && "fill-red-500 text-red-500"
+                      }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
+                    />
+                    <ShoppingCart
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCartWithVariants(product);
+                      }}
+                      className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {/* <CarouselComp SlideToShow={3} MainTitle="მსგავსი პროდუქტები">
           {supportProducts?.map((product: Product) => {
             const isCart = handleIsCart(product.id);
             return (
@@ -529,7 +620,7 @@ function ProductId({ params }: ProductIdProps) {
               </div>
             );
           })}
-        </CarouselComp>
+        </CarouselComp> */}
       </div>
     </div>
   );

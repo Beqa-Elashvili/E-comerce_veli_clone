@@ -25,6 +25,7 @@ import { Product, ShippingAddress } from "../types/globalStateTypes";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { setIsCartItemUnauthentificated } from "@/redux/globalSlice";
+import { HashLoader } from "react-spinners";
 
 function Chackout() {
   const [isInfo, setIsInfo] = useState<boolean>(true);
@@ -34,6 +35,27 @@ function Chackout() {
   const [form] = useForm();
   const { TextArea } = Input;
   const [toFinish, setToFinish] = useState(false);
+  const [saveCard, setSaveCard] = useState(true);
+  const [success, setSuccess] = useState<boolean>(false);
+
+  const [couponError, setCouponError] = useState<boolean>(false);
+  const [couponValue, setCouponValue] = useState("");
+  const [value, setValue] = useState("");
+
+  const shippingTime = [
+    { day: "დღეს", time: "19:00 - 22:00" },
+    { day: "დღეს", time: "22:00 - 01:00" },
+    { day: "ხვალ", time: "09:00 - 12:00" },
+    { day: "ხვალ", time: "12:00 - 15:00" },
+    { day: "ხვალ", time: "15:00 - 19:00" },
+  ];
+
+  const [chosenTime, setChosenTime] = useState({
+    day: shippingTime[0].day,
+    time: shippingTime[0].time,
+  });
+
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [chackoutInfo, setChackoutInfo] = useState({
     name: user?.name || "",
@@ -104,6 +126,7 @@ function Chackout() {
   const addShippingAddress: SubmitHandler<FieldValues> = async (data) => {
     const { postalCode, city, address, name } = data;
     try {
+      setLoading(true);
       if (postalCode.length !== 4) {
         form.setFields([
           {
@@ -123,9 +146,12 @@ function Chackout() {
       });
       await getShippingAddress();
       setisAddShoppingAddress(false);
+      setLoading(false);
       console.log("address added  succesfuly!");
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -142,18 +168,6 @@ function Chackout() {
   const [chosenShipingAddress, setChosenShipingAddress] =
     useState<ShippingAddress | null>();
 
-  const shippingTime = [
-    { day: "დღეს", time: "19:00 - 22:00" },
-    { day: "დღეს", time: "22:00 - 01:00" },
-    { day: "ხვალ", time: "09:00 - 12:00" },
-    { day: "ხვალ", time: "12:00 - 15:00" },
-    { day: "ხვალ", time: "15:00 - 19:00" },
-  ];
-
-  const [chosenTime, setChosenTime] = useState({
-    day: shippingTime[0].day,
-    time: shippingTime[0].time,
-  });
   const handleCheckboxChange = (time: string) => {
     if (chosenTime.time === time) {
       return;
@@ -166,7 +180,7 @@ function Chackout() {
   };
 
   const handleFinish = () => {
-    if (chosenTime && cart?.length !== 0) {
+    if (chosenTime && cart?.length !== 0 && chosenShipingAddress) {
       setToFinish(true);
     } else {
       toast.warning(
@@ -174,10 +188,6 @@ function Chackout() {
       );
     }
   };
-  const [saveCard, setSaveCard] = useState(true);
-
-  const [couponError, setCouponError] = useState<boolean>(false);
-  const [couponValue, setCouponValue] = useState("");
 
   const handleCupon = () => {
     const timeOut = setTimeout(() => {
@@ -225,10 +235,9 @@ function Chackout() {
     };
   }, [isModalOpen]);
 
-  const [success, setSuccess] = useState<boolean>(false);
-
   const handleModalSubmit: SubmitHandler<FieldValues> = async (data) => {
     try {
+      setLoading(true);
       await axios.post("/api/orders", {
         userId: user?.id,
         cartItems: cart,
@@ -242,19 +251,20 @@ function Chackout() {
         },
       });
       dispatch(setIsCartItemUnauthentificated([]));
+      setLoading(false);
       setSuccess(true);
     } catch (error) {
       console.log(error);
     } finally {
+      setLoading(false);
       const timeOut = setTimeout(() => {
         setSuccess(false);
       }, 1000);
-      // router.push("/");
+      router.push("/");
       return () => clearTimeout(timeOut);
     }
   };
 
-  const [value, setValue] = useState("");
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let inputValue = e.target.value;
 
@@ -857,9 +867,21 @@ function Chackout() {
 
                             <Button
                               type="submit"
-                              className="bg-black mt-4 text-white w-full p-4 font-semibold rounded-lg  duration-300 transition"
+                              className="bg-black flex items-center justify-center relative mt-4 text-white w-full p-4 font-semibold rounded-lg  duration-300 transition"
                             >
-                              გადახდა
+                              <p>გადახდა</p>
+                              <HashLoader
+                                style={{
+                                  position: "absolute",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  right: 20,
+                                }}
+                                loading={loading}
+                                size={25}
+                                color="#ffffff"
+                              />
                             </Button>
                           </Form>
                         </div>

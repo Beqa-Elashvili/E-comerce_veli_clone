@@ -69,7 +69,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Here, simulate the payment processing and mark it as successful
     await prisma.payment.update({
       where: { id: payment.id },
       data: {
@@ -77,7 +76,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // After successful payment, update stock and change order status
     for (const item of cartItems) {
       const product = await prisma.product.findUnique({
         where: { id: item.productId },
@@ -141,7 +139,7 @@ export async function POST(req: NextRequest) {
           },
         });
       } else {
-        if (product && product.stock < item.quantity) {
+        if (product?.stock && product.stock < item.quantity) {
           console.error(
             `Not enough stock for product ${item.productId}, this is base product`
           );
@@ -156,7 +154,7 @@ export async function POST(req: NextRequest) {
           await prisma.product.update({
             where: { id: product.id },
             data: {
-              stock: product.stock - item.quantity,
+              stock: product.stock && product.stock - item.quantity,
             },
           });
       }
@@ -305,26 +303,22 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // Deleting the order items (order details)
     await prisma.orderItem.deleteMany({
       where: { orderId: orderId },
     });
 
-    // If the order has a payment record, delete it
     if (order.payment) {
       await prisma.payment.delete({
         where: { id: order.payment.id },
       });
     }
 
-    // If the order has a shipping address, delete it
     if (order.shippingAddress) {
       await prisma.shippingAddress.delete({
         where: { id: order.shippingAddress.id },
       });
     }
 
-    // Finally, delete the order itself
     await prisma.order.delete({
       where: { id: orderId },
     });

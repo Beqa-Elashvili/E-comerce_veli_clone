@@ -413,7 +413,7 @@ const Navbar = () => {
                     />
                   </div>
                   <hr />
-                  <div className="flex flex-col gap-2">
+                  <div className="flex relative overflow-y-scroll max-h-80 flex-col gap-2">
                     {cart && cart?.length !== 0 ? (
                       <>
                         {cart?.map((item: Product, index: number) => (
@@ -422,10 +422,10 @@ const Navbar = () => {
                               <div className="flex">
                                 <img
                                   src={item.images[0].url}
-                                  className="size-14"
+                                  className="size-14 rounded-xl"
                                   alt="image"
                                 />
-                                <div className="space-y-2">
+                                <div className="space-y-2 ml-2">
                                   <h1>{item.name}</h1>
                                   <p>{item.price} ₾</p>
                                 </div>
@@ -477,7 +477,7 @@ const Navbar = () => {
                             {index !== cart.length - 1 && <hr />}
                           </div>
                         ))}
-                        <div className="p-2 flex mt-2 items-center justify-between">
+                        <div className="p-2 sticky bottom-0 bg-white flex mt-2 items-center justify-between">
                           <p>სულ: {handleTotalPrice()} ₾</p>
                           <div className="flex gap-1">
                             <button
@@ -487,7 +487,11 @@ const Navbar = () => {
                               ნახვა ({cart?.length})
                             </button>
                             <button
-                              onClick={() => handleIsAuthentificated()}
+                              onClick={() =>
+                                user
+                                  ? router.push("/chackout")
+                                  : dispatch(setIsAuthModalOpen(true))
+                              }
                               className="flex bg-green-400 hover:bg-green-500 transition duration-300 justify-center p-2 items-center rounded-lg"
                             >
                               ყიდვა
