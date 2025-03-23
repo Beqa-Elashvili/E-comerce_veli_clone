@@ -161,7 +161,7 @@ function Register() {
         ) : (
           <h1 className="text-3xl font-bold mb-8">შექმენი ანგარიში</h1>
         )}
-        <div className="font-bold   text-md  w-4/6  md:text-xl flex items-center justify-between gap-8">
+        <div className="font-bold   text-md m-auto  md:text-xl flex items-center justify-between gap-8">
           <div
             onClick={() => toggleIsRegisterForm("LOGIN")}
             className={`${

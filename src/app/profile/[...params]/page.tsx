@@ -8,12 +8,14 @@ import {
   MapPin,
   LogOut,
   Settings,
+  MoveLeftIcon,
+  ChevronLeft,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import axios from "axios";
 import useGetWishlistItems from "@/app/hooks/getWislistItems";
-import { Order, Product, ShippingAddress } from "@/app/types/globalStateTypes";
+import { Order, ShippingAddress } from "@/app/types/globalStateTypes";
 
 type ProfileProps = {
   params: Promise<{
@@ -29,7 +31,6 @@ function page({ params }: ProfileProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const { getWishlistItems } = useGetWishlistItems();
   const wishlist = useAppSelector((state) => state.global.isWishlist);
-
   const handleParams = async (par: string) => {
     if (par === "addresses") {
       const resp = await axios.get("/api/shippingaddress");
@@ -67,6 +68,11 @@ function page({ params }: ProfileProps) {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const SignOut = () => {
+    signOut();
+    router.push("/");
   };
 
   const handleName = () => {
@@ -198,7 +204,27 @@ function page({ params }: ProfileProps) {
               ))}
             </div>
           ) : (
-            <>ცარიელია</>
+            <div className="bg-gray-100 p-4 w-full rounded-xl flex justify-between items-center">
+              <img
+                className="h-40 object-contain"
+                src="/empty-box.webp"
+                alt="emtpyBox"
+              />
+              <div className="space-y-4">
+                <h1 className="text-xl font-semibold">
+                  აქტიური შეკვეთა არ იძებნება
+                </h1>
+                <p className="text-gray-5000">
+                  როგორც ჩანს, ჯერ არაფერი შეგიკვეთავს.
+                </p>
+                <button
+                  onClick={() => router.push("/")}
+                  className="bg-black text-white p-2 rounded-xl"
+                >
+                  დაიწყე სერფინგი
+                </button>
+              </div>
+            </div>
           )}
         </div>
       );
@@ -229,13 +255,40 @@ function page({ params }: ProfileProps) {
   };
   return (
     <div className="min-h-screen pb-6">
-      <h1 className="text-2xl flex gap-2 items-center font-semibold">
+      <div
+        className={`${name === "name" && "hidden"}
+         flex md:hidden justify-between w-full items-center`}
+      >
+        <ChevronLeft onClick={() => router.back()} className="cursor-pointer" />
+        <h1 className="text-xl font-semibold">{name}</h1>
+      </div>
+      <h1
+        className={`${
+          name === "wishlist" ||
+          name === "addresses" ||
+          name === "orders" ||
+          name === "settings"
+            ? "hidden md:flex"
+            : "flex"
+        }  text-2xl flex gap-2 items-center font-semibold`}
+      >
         <UserRound className="size-10 bg-gray-200 p-2 rounded-full" />
         გამარჯობა, {user?.name?.toUpperCase()}
       </h1>
+
       <hr className="my-4" />
       <div className="md:flex gap-12">
-        <div className="flex flex-col gap-2">
+        <div
+          className={`${
+            name === "wishlist" ||
+            name === "addresses" ||
+            name === "orders" ||
+            name === "orders" ||
+            name === "settings"
+              ? "hidden md:flex"
+              : "flex"
+          }  flex flex-col gap-2`}
+        >
           <div
             onClick={() => router.push("/profile/orders")}
             className={`flex  cursor-pointer text-lg w-full mr-12 items-center gap-6 p-4 rounded-xl ${
@@ -277,7 +330,7 @@ function page({ params }: ProfileProps) {
           </div>
           <hr />
           <div
-            onClick={() => signOut()}
+            onClick={() => SignOut()}
             className="flex text-lg cursor-pointer w-full mr-12 items-center gap-6 p-4 rounded-xl"
           >
             <LogOut />
