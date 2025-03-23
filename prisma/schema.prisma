@@ -41,7 +41,7 @@ model Product {
   ProductPerformance ProductPerformance[]
   Review             Review[]
   WishlistItem       WishlistItem[]
-  Color              Color[]              @relation("ProductColors")
+  Color              Color[]             @relation("ProductColors")
   Size               Size[]               @relation("ProductSizes")
   variants           ProductVariant[]
 }
