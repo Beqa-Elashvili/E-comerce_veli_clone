@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/app/lib/prisma";
 import bcrypt from "bcrypt";
+import { message } from "antd";
 
 export async function POST(req: NextRequest) {
   try {
-    console.log("Database connection established");
-
     const { name, email, password, phoneNumber } = await req.json();
     console.log("Request data received:", {
       name,
@@ -15,14 +14,14 @@ export async function POST(req: NextRequest) {
     });
 
     if (!name || !email || !password || !phoneNumber) {
-      console.error("Missing required fields:", {
+      console.error("ყველა ოფცია შევსებული უნდა იყოს", {
         name,
         email,
         password,
         phoneNumber,
       });
       return NextResponse.json(
-        { message: "Please compile all options" },
+        { message: "გთხოვთ შეავსოთ ყველა გრაფა" },
         { status: 400 }
       );
     }
@@ -34,7 +33,16 @@ export async function POST(req: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { message: "Email is already taken" },
+        { message: "მეილი უკვე გამოყენებულია" },
+        { status: 400 }
+      );
+    }
+    const existingPhoneNumber = await prisma.user.findUnique({
+      where: { phoneNumber },
+    });
+    if (existingPhoneNumber) {
+      return NextResponse.json(
+        { message: "მობილურის ნომერი უკვე გამოყენებულია" },
         { status: 400 }
       );
     }
@@ -65,6 +73,27 @@ export async function POST(req: NextRequest) {
       {
         message: "Internal Server Error",
       },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    await prisma.wishlistItem.deleteMany({});
+    await prisma.wishlist.deleteMany({});
+    await prisma.cartItem.deleteMany({});
+    await prisma.cart.deleteMany({});
+    await prisma.user.deleteMany({});
+    return NextResponse.json(
+      { message: "all user delete succesfuly" },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { message: "internal Server Error", error },
       {
         status: 500,
       }
