@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
       if (existingCartItem) {
         const newQuantity = existingCartItem.quantity + quantity;
 
-        if (availableStock < newQuantity) {
+        if (availableStock && availableStock < newQuantity) {
           return NextResponse.json(
             { message: `Not enough stock for the selected variant` },
             { status: 400 }
@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
           },
         });
       } else {
-        if (availableStock < quantity) {
+        if (availableStock && availableStock < quantity) {
           return NextResponse.json(
             { message: `Not enough stock for the selected variant` },
             { status: 400 }
