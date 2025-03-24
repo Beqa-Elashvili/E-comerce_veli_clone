@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { Category, Item, Product } from "@/app/types/globalStateTypes";
@@ -9,7 +11,7 @@ import useAddToCartMain from "../hooks/addToCartMain";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import CarouselComp from "../(components)/Carousel/Carousel";
-import { TableOfContents,  Flame } from "lucide-react";
+import { TableOfContents, Flame } from "lucide-react";
 import { setIsAllCategories } from "@/redux/categorySlice";
 
 function Main() {
@@ -39,7 +41,7 @@ function Main() {
     const product = axios.get("/api/products");
     const categoryResp = axios.get("/api/categories?name=კაცის ტანსაცმელი");
     const categoryChildren = axios.get("/api/categories?childrens=true");
-    
+
     async function getProducts() {
       const resp = await Promise.all([product, categoryResp, categoryChildren]);
       setProducts(resp[0].data.products);
@@ -143,7 +145,7 @@ function Main() {
             <div key={product.id} className="px-2 w-full md:px-4">
               <div
                 onClick={() => router.push(`/productId/${product.id}`)}
-                className="rounded-lg h-[240px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+                className="rounded-lg h-[270px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
               >
                 <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
                   <div className="flex flex-col items-center gap-2 ">
@@ -169,11 +171,11 @@ function Main() {
                   </div>
                 </div>
                 <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
-                  <p className="text-balance py-2 text-sm font-semibold text-gray-900">
+                  <p className="text-balance h-14 py-2 text-sm font-semibold text-gray-900">
                     {product.name}
                   </p>
                   <img
-                    className="h-20 md:h-40 m-auto object-cover"
+                    className="h-20 rounded-xl md:h-40 m-auto object-cover"
                     src={product.images[0].url}
                     alt="image"
                   />
