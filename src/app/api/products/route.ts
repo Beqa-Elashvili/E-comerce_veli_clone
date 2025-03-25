@@ -208,6 +208,9 @@ export async function GET(req: NextRequest) {
         include: {
           images: true,
           category: true,
+          Color: true,
+          Size: true,
+          variants: true,
         },
       });
       return NextResponse.json(

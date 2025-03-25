@@ -282,10 +282,13 @@ const Navbar = () => {
     router.push(href);
   };
 
-  const handleIsAuthentificated = () => {
-    user ? "/chackout" : dispatch(setIsAuthModalOpen(true));
+  const handleEnterKey = (e: any) => {
+    if (e.key === "Enter") {
+      if (showResults && searchResults.length > 0) {
+        router.push(`/category/q=${value}`);
+      }
+    }
   };
-
   return (
     <div
       className={`flex sticky top-0 z-40 justify-between gap-12 bg-main py-4 px-2 lg:px-8 xl:px-40 items-center w-full mb-7`}
@@ -326,6 +329,7 @@ const Navbar = () => {
             ref={inputRef}
             onFocus={() => dispatch(setShowResults(true))}
             value={value}
+            onKeyDown={handleEnterKey}
             onChange={(e) => setValue(e.target.value)}
             type="search"
             placeholder="რას ეძებ ?"
@@ -360,6 +364,7 @@ const Navbar = () => {
             {searchResults?.map((item: Product) => {
               return (
                 <div
+                  onClick={() => router.push(`/productId/${item.id}`)}
                   className="cursor-pointer py-2 hover:text-gray-700"
                   key={item.id}
                 >
