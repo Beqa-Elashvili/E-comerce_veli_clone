@@ -35,16 +35,19 @@ export default function useAddToCartMain() {
             !cartItem.selectedSize) ||
           (cartItem.selectedSize === item.sizeName && !cartItem.selectedColor)
       );
+
       const product: Product = {
         ...cartItem,
         selectedColor:
-          cartItem.selectedColor || variantDetails[0].colorName || "",
-        selectedSize: cartItem.selectedSize || variantDetails[0].sizeName || "",
+          cartItem.selectedColor || variantDetails[0].colorName || null,
+        selectedSize:
+          cartItem.selectedSize || variantDetails[0].sizeName || null,
         VariantStock:
           variantStock?.VariantStock ||
           variantDetails[0].VariantStock ||
           cartItem.stock,
       };
+      console.log(product)
 
       if (product) {
         await addToCart(user?.id as unknown as string, product, 1);

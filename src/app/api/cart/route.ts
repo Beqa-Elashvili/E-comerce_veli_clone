@@ -139,10 +139,19 @@ export async function POST(req: NextRequest) {
           (item.selectedSize === selectedSize || !selectedSize)
       );
 
+      if (availableStock === 0) {
+        return NextResponse.json(
+          { message: `Not enough stock for the selected variant` },
+          { status: 400 }
+        );
+      }
+
       if (existingCartItem) {
         const newQuantity = existingCartItem.quantity + quantity;
-
-        if (availableStock && availableStock < newQuantity) {
+        if (
+          (availableStock && availableStock < newQuantity) ||
+          availableStock === 0
+        ) {
           return NextResponse.json(
             { message: `Not enough stock for the selected variant` },
             { status: 400 }
@@ -156,7 +165,10 @@ export async function POST(req: NextRequest) {
           },
         });
       } else {
-        if (availableStock && availableStock < quantity) {
+        if (
+          (availableStock && availableStock === 0) ||
+          (availableStock && availableStock < quantity)
+        ) {
           return NextResponse.json(
             { message: `Not enough stock for the selected variant` },
             { status: 400 }
