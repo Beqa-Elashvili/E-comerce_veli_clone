@@ -10,9 +10,13 @@ interface variantDetailsProps {
 
 export default function useAddToCartMain() {
   const user = useAppSelector((state) => state.user.user);
-  const { addToCart } = useAddToCart();
+  const { addToCart, loadingStates, setLoadingStates } = useAddToCart();
 
   const addToCartWithVariants = async (cartItem: Product) => {
+    setLoadingStates((prev) => ({
+      ...prev,
+      [cartItem.id]: true,
+    }));
     if (cartItem.variants.length !== 0) {
       const variantDetails: variantDetailsProps[] = cartItem.variants.map(
         (variant) => {
@@ -47,7 +51,6 @@ export default function useAddToCartMain() {
           variantDetails[0].VariantStock ||
           cartItem.stock,
       };
-      console.log(product)
 
       if (product) {
         await addToCart(user?.id as unknown as string, product, 1);
@@ -55,6 +58,10 @@ export default function useAddToCartMain() {
     } else {
       addToCart(user?.id as unknown as string, cartItem, 1);
     }
+    setLoadingStates((prev) => ({
+      ...prev,
+      [cartItem.id]: false,
+    }));
   };
-  return { addToCartWithVariants };
+  return { addToCartWithVariants, loadingStates };
 }

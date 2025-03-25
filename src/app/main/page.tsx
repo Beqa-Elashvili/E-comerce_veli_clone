@@ -13,6 +13,7 @@ import { useSession } from "next-auth/react";
 import CarouselComp from "../(components)/Carousel/Carousel";
 import { TableOfContents, Flame } from "lucide-react";
 import { setIsAllCategories } from "@/redux/categorySlice";
+import { GridLoader } from "react-spinners";
 
 function Main() {
   const router = useRouter();
@@ -22,7 +23,7 @@ function Main() {
   const { IsWishlist } = useGetIsWishlist();
   const [products, setProducts] = useState<Product[]>([]);
   const dispatch = useAppDispatch();
-  const { addToCartWithVariants } = useAddToCartMain();
+  const { addToCartWithVariants, loadingStates } = useAddToCartMain();
   const user = useAppSelector((state) => state.user.user);
   const { status } = useSession();
   const [manClothes, setManClothes] = useState<childrenCategory>();
@@ -140,6 +141,7 @@ function Main() {
 
       <CarouselComp MainTitle="განახლებული კოლექცია">
         {products?.map((product: Product) => {
+          console.log(loadingStates[product.id]);
           const isCart = handleIsCart(product.id);
           return (
             <div key={product.id} className="px-2 w-full md:px-4">
@@ -161,13 +163,23 @@ function Main() {
                         IsWishlist(product.id) && "fill-red-500 text-red-500"
                       }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
                     />
-                    <ShoppingCart
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addToCartWithVariants(product);
-                      }}
-                      className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
-                    />
+                    {loadingStates[product.id] ? (
+                      <div className="bg-white w-8 h-8 border rounded-lg p-1">
+                        <GridLoader
+                          color="#525fd16c"
+                          size={4}
+                          className="w-6"
+                        />
+                      </div>
+                    ) : (
+                      <ShoppingCart
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCartWithVariants(product);
+                        }}
+                        className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
@@ -205,13 +217,20 @@ function Main() {
                       IsWishlist(product.id) && "fill-red-500 text-red-500"
                     }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
                   />
-                  <ShoppingCart
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addToCartWithVariants(product);
-                    }}
-                    className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
-                  />
+
+                  {loadingStates[product.id] ? (
+                    <div className="bg-white w-1/2 h-8 border rounded-lg p-1">
+                      <GridLoader color="#525fd16c" size={4} className="w-6" />
+                    </div>
+                  ) : (
+                    <ShoppingCart
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCartWithVariants(product);
+                      }}
+                      className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                    />
+                  )}
                 </div>
               </div>
             </div>

@@ -23,7 +23,8 @@ function Cart() {
   const { deleteCartItem } = useDeleteCartItem();
   const { handleQuantityIncart } = useHandleQuantityIncart();
   const { addToCart, loadingStates, setLoadingStates } = useAddToCart();
-  const { addToCartWithVariants } = useAddToCartMain();
+  const { addToCartWithVariants, loadingStates: productLoad } =
+    useAddToCartMain();
   const { handleCartQuantity, handleTotalPrice } = useHandleCartquantity();
   const [sortOption, setSortOption] = useState<string>("price_low_to_high");
   const { isAuthModalOpen, setIsAuthModalOpen } = useAuthModal();
@@ -223,6 +224,11 @@ function Cart() {
                           +
                         </div>
                         {loadingStates[
+                          status === "unauthenticated"
+                            ? item.id
+                            : item.productId
+                        ] ||
+                        productLoad[
                           status === "unauthenticated"
                             ? item.id
                             : item.productId

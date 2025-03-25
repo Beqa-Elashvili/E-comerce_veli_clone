@@ -11,6 +11,7 @@ import useAddToCartMain from "@/app/hooks/addToCartMain";
 import { Frown, ChevronLeft } from "lucide-react";
 import useGetIsWishlist from "@/app/actions/getIswishlist";
 import { useSession } from "next-auth/react";
+import { GridLoader } from "react-spinners";
 
 type CategorysProps = {
   params: Promise<{
@@ -25,7 +26,7 @@ function Categorys({ params }: CategorysProps) {
 
   const [products, setProducts] = useState<Item>();
   const { addWishlistItem } = useAddinWinshilst();
-  const { addToCartWithVariants } = useAddToCartMain();
+  const { addToCartWithVariants, loadingStates } = useAddToCartMain();
   const { IsWishlist } = useGetIsWishlist();
 
   const user = useAppSelector((state) => state.user.user);
@@ -121,14 +122,73 @@ function Categorys({ params }: CategorysProps) {
           </div>
           {productsList.length !== 0 ? (
             <div className="grid grid-cols-3 md:grid-cols-4 mt-12 pb-4 w-full gap-2 gap-y-4">
-              {productsList.map((Product) => (
-                <div key={Product.id} className="px-0 md:px-4">
-                  <div
-                    onClick={() => router.push(`/productId/${Product.id}`)}
-                    className="rounded-lg h-[220px] md:h-[300px] hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
-                  >
-                    <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
-                      <div className="flex flex-col items-center gap-2 ">
+              {productsList.map((Product) => {
+                const isCart = handleIsCart(Product.id);
+                return (
+                  <div key={Product.id} className="px-2 w-full md:px-4">
+                    <div
+                      onClick={() => router.push(`/productId/${Product.id}`)}
+                      className="rounded-lg h-[270px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+                    >
+                      <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
+                        <div className="flex flex-col items-center gap-2 ">
+                          <Heart
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addWishlistItem(
+                                user?.id as unknown as string,
+                                Product.id as unknown as string
+                              );
+                            }}
+                            className={`w-8 h-8  ${
+                              IsWishlist(Product.id) &&
+                              "fill-red-500 text-red-500"
+                            }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
+                          />
+                          {loadingStates[Product.id] ? (
+                            <div className="bg-white w-8 h-8 border rounded-lg p-1">
+                              <GridLoader
+                                color="#525fd16c"
+                                size={4}
+                                className="w-6"
+                              />
+                            </div>
+                          ) : (
+                            <ShoppingCart
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addToCartWithVariants(Product);
+                              }}
+                              className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                            />
+                          )}
+                        </div>
+                      </div>
+                      <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
+                        <p className="text-balance h-14 py-2 text-sm font-semibold text-gray-900">
+                          {Product.name}
+                        </p>
+                        <img
+                          className="h-20 rounded-xl md:h-40 m-auto object-cover"
+                          src={Product.images[0].url}
+                          alt="image"
+                        />
+                        {isCart && (
+                          <div className="hidden md:flex gap-2">
+                            <ShoppingCart className="text-green-500 fill-green-200" />
+                            <p className="text-sm">დამატებულია</p>
+                          </div>
+                        )}
+                        <div className="text-start md:h-20 mt-2">
+                          <p className="font-semibold text-sm">
+                            {Product.price} ₾
+                          </p>
+                          <p className="text-sm h-10 w-28 hidde md:block mt-2">
+                            {Product.description?.slice(0, 20)}...
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex w-full justify-between md:hidden">
                         <Heart
                           onClick={(e) => {
                             e.stopPropagation();
@@ -137,60 +197,34 @@ function Categorys({ params }: CategorysProps) {
                               Product.id as unknown as string
                             );
                           }}
-                          className={`w-8 h-8   cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
+                          className={`w-8 h-8  ${
+                            IsWishlist(Product.id) &&
+                            "fill-red-500 text-red-500"
+                          }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
                         />
 
-                        <ShoppingCart
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addToCartWithVariants(Product);
-                          }}
-                          className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
-                        />
+                        {loadingStates[Product.id] ? (
+                          <div className="bg-white w-1/2 h-8 border rounded-lg p-1">
+                            <GridLoader
+                              color="#525fd16c"
+                              size={4}
+                              className="w-6"
+                            />
+                          </div>
+                        ) : (
+                          <ShoppingCart
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToCartWithVariants(Product);
+                            }}
+                            className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                          />
+                        )}
                       </div>
-                    </div>
-                    <div className="hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
-                      <p className="text-balance py-2 text-sm font-semibold text-gray-900">
-                        {Product.name}
-                      </p>
-                      <img
-                        className="h-20 md:h-40 m-auto object-cover"
-                        src={Product.images[0].url}
-                        alt="image"
-                      />
-
-                      <div className="text-start md:h-20 mt-2">
-                        <p className="font-semibold text-sm">
-                          ფასი: {Product.price} ₾
-                        </p>
-                        <p className="text-sm hidden md:block mt-2">
-                          {Product.description?.slice(0, 20)}...
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex md:hidden">
-                      <Heart
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addWishlistItem(
-                            user?.id as unknown as string,
-                            Product.id as unknown as string
-                          );
-                        }}
-                        className={`w-8 h-8  
-                         cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
-                      />
-                      <ShoppingCart
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCartWithVariants(Product);
-                        }}
-                        className=" h-8 w-full border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
-                      />
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <>
@@ -219,7 +253,7 @@ function Categorys({ params }: CategorysProps) {
                                 onClick={() =>
                                   router.push(`/productId/${product.id}`)
                                 }
-                                className="rounded-lg h-[240px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+                                className="rounded-lg h-[270px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
                               >
                                 <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
                                   <div className="flex flex-col items-center gap-2 ">
@@ -236,21 +270,31 @@ function Categorys({ params }: CategorysProps) {
                                         "fill-red-500 text-red-500"
                                       }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
                                     />
-                                    <ShoppingCart
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        addToCartWithVariants(product);
-                                      }}
-                                      className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
-                                    />
+                                    {loadingStates[product.id] ? (
+                                      <div className="bg-white w-8 h-8 border rounded-lg p-1">
+                                        <GridLoader
+                                          color="#525fd16c"
+                                          size={4}
+                                          className="w-6"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <ShoppingCart
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          addToCartWithVariants(product);
+                                        }}
+                                        className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                                      />
+                                    )}
                                   </div>
                                 </div>
                                 <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
-                                  <p className="text-balance py-2 text-sm font-semibold text-gray-900">
+                                  <p className="text-balance h-14 py-2 text-sm font-semibold text-gray-900">
                                     {product.name}
                                   </p>
                                   <img
-                                    className="h-20 md:h-40 m-auto object-cover"
+                                    className="h-20 rounded-xl md:h-40 m-auto object-cover"
                                     src={product.images[0].url}
                                     alt="image"
                                   />
@@ -283,13 +327,24 @@ function Categorys({ params }: CategorysProps) {
                                       "fill-red-500 text-red-500"
                                     }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
                                   />
-                                  <ShoppingCart
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      addToCartWithVariants(product);
-                                    }}
-                                    className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
-                                  />
+
+                                  {loadingStates[product.id] ? (
+                                    <div className="bg-white w-1/2 h-8 border rounded-lg p-1">
+                                      <GridLoader
+                                        color="#525fd16c"
+                                        size={4}
+                                        className="w-6"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <ShoppingCart
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        addToCartWithVariants(product);
+                                      }}
+                                      className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                                    />
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -302,15 +357,16 @@ function Categorys({ params }: CategorysProps) {
                 {name2 && (
                   <>
                     {products?.Product.map((Product: Product) => {
+                      const isCart = handleIsCart(Product.id);
                       return (
-                        <div key={Product.id} className="px-0 md:px-4">
+                        <div key={Product.id} className="px-2 w-full md:px-4">
                           <div
                             onClick={() =>
                               router.push(`/productId/${Product.id}`)
                             }
-                            className="rounded-lg h-[220px] md:h-[300px] hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+                            className="rounded-lg h-[270px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
                           >
-                            <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
+                            <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
                               <div className="flex flex-col items-center gap-2 ">
                                 <Heart
                                   onClick={(e) => {
@@ -320,37 +376,55 @@ function Categorys({ params }: CategorysProps) {
                                       Product.id as unknown as string
                                     );
                                   }}
-                                  className={`w-8 h-8   cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
+                                  className={`w-8 h-8  ${
+                                    IsWishlist(Product.id) &&
+                                    "fill-red-500 text-red-500"
+                                  }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
                                 />
-                                <ShoppingCart
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    addToCartWithVariants(Product);
-                                  }}
-                                  className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
-                                />
+                                {loadingStates[Product.id] ? (
+                                  <div className="bg-white w-8 h-8 border rounded-lg p-1">
+                                    <GridLoader
+                                      color="#525fd16c"
+                                      size={4}
+                                      className="w-6"
+                                    />
+                                  </div>
+                                ) : (
+                                  <ShoppingCart
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addToCartWithVariants(Product);
+                                    }}
+                                    className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                                  />
+                                )}
                               </div>
                             </div>
-                            <div className="hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
-                              <p className="text-balance py-2 text-sm font-semibold text-gray-900">
+                            <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
+                              <p className="text-balance h-14 py-2 text-sm font-semibold text-gray-900">
                                 {Product.name}
                               </p>
                               <img
-                                className="h-20 md:h-40 m-auto object-cover"
+                                className="h-20 rounded-xl md:h-40 m-auto object-cover"
                                 src={Product.images[0].url}
                                 alt="image"
                               />
-
+                              {isCart && (
+                                <div className="hidden md:flex gap-2">
+                                  <ShoppingCart className="text-green-500 fill-green-200" />
+                                  <p className="text-sm">დამატებულია</p>
+                                </div>
+                              )}
                               <div className="text-start md:h-20 mt-2">
                                 <p className="font-semibold text-sm">
-                                  ფასი: {Product.price} ₾
+                                  {Product.price} ₾
                                 </p>
-                                <p className="text-sm hidden md:block mt-2">
+                                <p className="text-sm h-10 w-28 hidde md:block mt-2">
                                   {Product.description?.slice(0, 20)}...
                                 </p>
                               </div>
                             </div>
-                            <div className="flex md:hidden">
+                            <div className="flex w-full justify-between md:hidden">
                               <Heart
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -359,16 +433,29 @@ function Categorys({ params }: CategorysProps) {
                                     Product.id as unknown as string
                                   );
                                 }}
-                                className={`w-8 h-8  
-                         cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
+                                className={`w-8 h-8  ${
+                                  IsWishlist(Product.id) &&
+                                  "fill-red-500 text-red-500"
+                                }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
                               />
-                              <ShoppingCart
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  addToCartWithVariants(Product);
-                                }}
-                                className=" h-8 w-full border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
-                              />
+
+                              {loadingStates[Product.id] ? (
+                                <div className="bg-white w-1/2 h-8 border rounded-lg p-1">
+                                  <GridLoader
+                                    color="#525fd16c"
+                                    size={4}
+                                    className="w-6"
+                                  />
+                                </div>
+                              ) : (
+                                <ShoppingCart
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    addToCartWithVariants(Product);
+                                  }}
+                                  className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                                />
+                              )}
                             </div>
                           </div>
                         </div>
