@@ -69,7 +69,7 @@ const Navbar = () => {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [showCart, setShowCart] = useState<boolean>(false);
-  const { addToCartWithVariants } = useAddToCartMain();
+  const { addToCartWithVariants, loadingStates: Load } = useAddToCartMain();
   const { addToCart, loadingStates, setLoadingStates } = useAddToCart();
   const { deleteCartItem } = useDeleteCartItem();
 
@@ -423,6 +423,15 @@ const Navbar = () => {
                                 <img
                                   src={item.images[0].url}
                                   className="size-14 rounded-xl"
+                                  onClick={() =>
+                                    router.push(
+                                      `/productId/${
+                                        status === "unauthenticated"
+                                          ? item.id
+                                          : item.productId
+                                      }`
+                                    )
+                                  }
                                   alt="image"
                                 />
                                 <div className="space-y-2 ml-2">
@@ -441,6 +450,11 @@ const Navbar = () => {
                                         +
                                       </div>
                                       {loadingStates[
+                                        status === "unauthenticated"
+                                          ? item.id
+                                          : item.productId
+                                      ] ||
+                                      Load[
                                         status === "unauthenticated"
                                           ? item.id
                                           : item.productId
