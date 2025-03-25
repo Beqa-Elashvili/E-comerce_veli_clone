@@ -614,12 +614,12 @@ const Navbar = () => {
           )}
         </div>
         <div
-          className={`absolute hidden lg:block inset-0 ${
+          className={`absolute hidden lg:block  inset-0 ${
             isSticky ? "pointer-events-auto" : "pointer-events-none"
-          }  top-16 px-4 lg:px-8 xl:px-40`}
+          }  top-16  w-full`}
         >
           <div
-            className={`bg-gray-50 z-20 sticky top-20 items-center text-center overflow-hidden w-full gap-2 transition-all duration-500 ease-in-out ${
+            className={`bg-gray-50 px-4 lg:px-8 xl:px-40 z-20 sticky top-20 items-center text-center overflow-hidden w-full gap-2 transition-all duration-500 ease-in-out ${
               isSticky
                 ? "opacity-100 flex pointer-events-auto translate-y-4"
                 : "opacity-0 flex pointer-events-none"
@@ -656,7 +656,6 @@ const Navbar = () => {
                   </div>
                 ))}
               </CarouselComp>
-              <div className="absolute bottom-0 w-full shadow-lg  bg-gradient-to-b  from-gray-50 to-transparent  pointer-events-none"></div>
             </div>
           </div>
         </div>

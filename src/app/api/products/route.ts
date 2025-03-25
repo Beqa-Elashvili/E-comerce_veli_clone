@@ -263,6 +263,8 @@ export async function GET(req: NextRequest) {
 }
 export async function DELETE(req: NextRequest) {
   try {
+    await prisma.cartItem.deleteMany({});
+    await prisma.wishlistItem.deleteMany({});
     await prisma.productVariant.deleteMany({});
     await prisma.product.deleteMany({});
 

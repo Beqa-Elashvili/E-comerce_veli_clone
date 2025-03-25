@@ -14,6 +14,7 @@ import CarouselComp from "../(components)/Carousel/Carousel";
 import { TableOfContents, Flame } from "lucide-react";
 import { setIsAllCategories } from "@/redux/categorySlice";
 import { GridLoader } from "react-spinners";
+import { setCategoryChildren } from "@/redux/categorySlice";
 
 function Main() {
   const router = useRouter();
@@ -26,7 +27,6 @@ function Main() {
   const { addToCartWithVariants, loadingStates } = useAddToCartMain();
   const user = useAppSelector((state) => state.user.user);
   const { status } = useSession();
-  const [manClothes, setManClothes] = useState<childrenCategory>();
 
   type childrenCategory = {
     Product: Product[];
@@ -36,18 +36,18 @@ function Main() {
     name: string;
     parentId: number;
   };
-  const [categoryChildrens, setcategoryChildrens] = useState<Item[]>([]);
+  const categoryChildrens = useAppSelector(
+    (state) => state.categories.categoryChildren
+  );
 
   useEffect(() => {
     const product = axios.get("/api/products");
-    const categoryResp = axios.get("/api/categories?name=კაცის ტანსაცმელი");
     const categoryChildren = axios.get("/api/categories?childrens=true");
 
     async function getProducts() {
-      const resp = await Promise.all([product, categoryResp, categoryChildren]);
+      const resp = await Promise.all([product, categoryChildren]);
       setProducts(resp[0].data.products);
-      setManClothes(resp[1].data.category);
-      setcategoryChildrens(resp[2].data.category);
+      dispatch(setCategoryChildren(resp[1].data.category));
     }
     getProducts();
   }, []);
@@ -140,7 +140,7 @@ function Main() {
       </CarouselComp>
 
       <CarouselComp MainTitle="განახლებული კოლექცია">
-        {products?.map((product: Product) => {
+        {products?.slice(0, 12).map((product: Product) => {
           const isCart = handleIsCart(product.id);
           return (
             <div key={product.id} className="px-2 w-full md:px-4">
@@ -186,7 +186,7 @@ function Main() {
                     {product.name}
                   </p>
                   <img
-                    className="h-20 rounded-xl md:h-40 m-auto object-cover"
+                    className="h-20 rounded-xl md:h-40 m-auto object-contain"
                     src={product.images[0].url}
                     alt="image"
                   />
@@ -236,27 +236,17 @@ function Main() {
           );
         })}
       </CarouselComp>
-      <img src="/cover3.jpg" alt="image" className="rounded-3xl" />
-      <CarouselComp
-        Cover={
-          <div className="bg-sky-400 rounded-lg py-12">
-            {manClothes && (
-              <h1 className="text-6xl font-semibold text-sky-200">
-                {manClothes.name}
-              </h1>
-            )}
-          </div>
-        }
-      >
-        {manClothes?.Product?.map((product: Product) => {
+      <img src="/cover-2.jpg" alt="image" className="rounded-3xl" />
+      <CarouselComp MainTitle="Best Price">
+        {products?.slice(12, 22).map((product: Product) => {
           const isCart = handleIsCart(product.id);
           return (
-            <div key={product.id} className="px-2">
+            <div key={product.id} className="px-2 w-full md:px-4">
               <div
                 onClick={() => router.push(`/productId/${product.id}`)}
-                className="rounded-lg md:hover:bg-gray-100 relative text-center h-full overflow-hidden cursor-pointer max-w-52"
+                className="rounded-lg h-[270px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
               >
-                <div className="absolute inset-0  opacity-0 flex  gap-2 hover:opacity-100 items-center justify-end transition  duration-500 hover:-translate-x-5 ">
+                <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
                   <div className="flex flex-col items-center gap-2 ">
                     <Heart
                       onClick={(e) => {
@@ -270,38 +260,74 @@ function Main() {
                         IsWishlist(product.id) && "fill-red-500 text-red-500"
                       }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
                     />
+                    {loadingStates[product.id] ? (
+                      <div className="bg-white w-8 h-8 border rounded-lg p-1">
+                        <GridLoader
+                          color="#525fd16c"
+                          size={4}
+                          className="w-6"
+                        />
+                      </div>
+                    ) : (
+                      <ShoppingCart
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCartWithVariants(product);
+                        }}
+                        className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
+                  <p className="text-balance h-14 py-2 text-sm font-semibold text-gray-900">
+                    {product.name}
+                  </p>
+                  <img
+                    className="h-20 rounded-xl md:h-40 m-auto object-contain"
+                    src={product.images[0].url}
+                    alt="image"
+                  />
+                  {isCart && (
+                    <div className="hidden md:flex gap-2">
+                      <ShoppingCart className="text-green-500 fill-green-200" />
+                      <p className="text-sm">დამატებულია</p>
+                    </div>
+                  )}
+                  <div className="text-start md:h-20 mt-2">
+                    <p className="font-semibold text-sm">{product.price} ₾</p>
+                    <p className="text-sm h-10 w-28 hidde md:block mt-2">
+                      {product.description?.slice(0, 20)}...
+                    </p>
+                  </div>
+                </div>
+                <div className="flex w-full justify-between md:hidden">
+                  <Heart
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addWishlistItem(
+                        user?.id as unknown as string,
+                        product.id as unknown as string
+                      );
+                    }}
+                    className={`w-8 h-8  ${
+                      IsWishlist(product.id) && "fill-red-500 text-red-500"
+                    }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
+                  />
+
+                  {loadingStates[product.id] ? (
+                    <div className="bg-white w-1/2 h-8 border rounded-lg p-1">
+                      <GridLoader color="#525fd16c" size={4} className="w-6" />
+                    </div>
+                  ) : (
                     <ShoppingCart
                       onClick={(e) => {
                         e.stopPropagation();
                         addToCartWithVariants(product);
                       }}
-                      className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                      className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
                     />
-                  </div>
-                </div>
-                <div className="hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
-                  <p className="text-balance py-2 text-sm font-semibold text-gray-900">
-                    {product.name}
-                  </p>
-                  <img
-                    className="h-40 m-auto object-cover"
-                    src={product.images[0].url}
-                    alt="image"
-                  />
-                  {isCart && (
-                    <div className="flex gap-2">
-                      <ShoppingCart className="text-green-500 fill-green-200" />
-                      <p className="text-sm">დამატებულია</p>
-                    </div>
                   )}
-                  <div className="text-start mt-2">
-                    <p className="font-semibold text-sm">
-                      ფასი: {product.price} ₾;
-                    </p>
-                    <p className="text-sm mt-2">
-                      {product.description?.slice(0, 20)}...
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
