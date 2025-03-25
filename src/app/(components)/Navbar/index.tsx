@@ -197,7 +197,6 @@ const Navbar = () => {
       };
       addToCart(user?.id as unknown as string, productWithVariant, 1);
     } else {
-      console.log(product);
       addToCartWithVariants({ ...product, id: product.productId });
     }
   };

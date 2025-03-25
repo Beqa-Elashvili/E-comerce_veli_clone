@@ -23,6 +23,13 @@ export default function addToCartUnauthenticated(
 
   const currentQuantity = existingCartItem ? existingCartItem.quantity || 0 : 0;
   const totalQuantity = currentQuantity + quantity;
+  if (!product.VariantStock && !product.stock) {
+    toast.dismiss();
+    toast.error("მარაგი ამოიწურა", {
+      position: "bottom-right",
+    });
+    return;
+  }
 
   if (product.VariantStock || product.stock)
     if (

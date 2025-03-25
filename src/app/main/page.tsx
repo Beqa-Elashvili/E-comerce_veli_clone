@@ -141,7 +141,6 @@ function Main() {
 
       <CarouselComp MainTitle="განახლებული კოლექცია">
         {products?.map((product: Product) => {
-          console.log(loadingStates[product.id]);
           const isCart = handleIsCart(product.id);
           return (
             <div key={product.id} className="px-2 w-full md:px-4">
