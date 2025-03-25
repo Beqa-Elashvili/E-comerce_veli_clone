@@ -182,7 +182,7 @@ function Main() {
                   </div>
                 </div>
                 <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
-                  <p className="text-balance h-14 py-2 text-sm font-semibold text-gray-900">
+                  <p className="text-balance h-16 py-2 text-sm font-semibold text-gray-900">
                     {product.name}
                   </p>
                   <img

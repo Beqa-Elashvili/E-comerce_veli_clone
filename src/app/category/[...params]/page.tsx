@@ -146,11 +146,11 @@ function Categorys({ params }: CategorysProps) {
                     </div>
                   </div>
                   <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
-                    <p className="text-balance h-14 py-2 text-sm font-semibold text-gray-900">
+                    <p className="text-balance h-16 py-2 text-sm font-semibold text-gray-900">
                       {Product.name}
                     </p>
                     <img
-                      className="h-20 rounded-xl md:h-40 m-auto object-cover"
+                      className="h-20 rounded-xl md:h-40 m-auto object-contain"
                       src={Product.images[0].url}
                       alt="image"
                     />
@@ -280,11 +280,11 @@ function Categorys({ params }: CategorysProps) {
                             </div>
                           </div>
                           <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
-                            <p className="text-balance h-14 py-2 text-sm font-semibold text-gray-900">
+                            <p className="text-balance h-16 py-2 text-sm font-semibold text-gray-900">
                               {Product.name}
                             </p>
                             <img
-                              className="h-20 rounded-xl md:h-40 m-auto object-cover"
+                              className="h-20 rounded-xl md:h-40 m-auto object-contain"
                               src={Product.images[0].url}
                               alt="image"
                             />
@@ -405,11 +405,11 @@ function Categorys({ params }: CategorysProps) {
                                       </div>
                                     </div>
                                     <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
-                                      <p className="text-balance h-14 py-2 text-sm font-semibold text-gray-900">
+                                      <p className="text-balance h-16 py-2 text-sm font-semibold text-gray-900">
                                         {product.name}
                                       </p>
                                       <img
-                                        className="h-20 rounded-xl md:h-40 m-auto object-cover"
+                                        className="h-20 rounded-xl md:h-40 m-auto object-contaion"
                                         src={product.images[0].url}
                                         alt="image"
                                       />
@@ -519,11 +519,11 @@ function Categorys({ params }: CategorysProps) {
                                   </div>
                                 </div>
                                 <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
-                                  <p className="text-balance h-14 py-2 text-sm font-semibold text-gray-900">
+                                  <p className="text-balance h-16 py-2 text-sm font-semibold text-gray-900">
                                     {Product.name}
                                   </p>
                                   <img
-                                    className="h-20 rounded-xl md:h-40 m-auto object-cover"
+                                    className="h-20 rounded-xl md:h-40 m-auto object-contaion"
                                     src={Product.images[0].url}
                                     alt="image"
                                   />

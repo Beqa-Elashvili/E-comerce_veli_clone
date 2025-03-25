@@ -467,7 +467,7 @@ function ProductId({ params }: ProductIdProps) {
               <div key={product.id} className="px-2 min-w-40 md:px-4">
                 <div
                   onClick={() => router.push(`/productId/${product.id}`)}
-                  className="rounded-lg h-[240px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+                  className="rounded-lg h-[270px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
                 >
                   <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
                     <div className="flex flex-col items-center gap-2 ">
@@ -493,11 +493,11 @@ function ProductId({ params }: ProductIdProps) {
                     </div>
                   </div>
                   <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
-                    <p className="text-balance py-2 text-sm font-semibold text-gray-900">
+                    <p className="text-balance h-16 py-2 text-sm font-semibold text-gray-900">
                       {product.name}
                     </p>
                     <img
-                      className="h-20 md:h-40 m-auto object-cover"
+                      className="h-20 md:h-40 rounded-xl m-auto object-contain"
                       src={product.images[0].url}
                       alt="image"
                     />

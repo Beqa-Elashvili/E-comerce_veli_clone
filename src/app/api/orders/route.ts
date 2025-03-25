@@ -313,12 +313,6 @@ export async function DELETE(req: NextRequest) {
       });
     }
 
-    if (order.shippingAddress) {
-      await prisma.shippingAddress.delete({
-        where: { id: order.shippingAddress.id },
-      });
-    }
-
     await prisma.order.delete({
       where: { id: orderId },
     });

@@ -236,8 +236,36 @@ function Chackout() {
   }, [isModalOpen]);
 
   const handleModalSubmit: SubmitHandler<FieldValues> = async (data) => {
+    const { CVC, cardNumber, validity } = data;
     try {
       setLoading(true);
+      if (cardNumber.length !== 16) {
+        form.setFields([
+          {
+            name: "cardNumber",
+            errors: ["ბარათის ნომერი უნდა შედგებოდეს 16 რიცხვისგან!"],
+          },
+        ]);
+        return;
+      }
+      if (CVC.length !== 3) {
+        form.setFields([
+          {
+            name: "CVC",
+            errors: ["CVC კოდი უნდა შედგებოდეს 3 რიცხვისაგან!"],
+          },
+        ]);
+        return;
+      }
+      if (validity.length !== 5) {
+        form.setFields([
+          {
+            name: "CVC",
+            errors: ["გთხოვთ მიუთითოთ სწორი ვადა!"],
+          },
+        ]);
+        return;
+      }
       await axios.post("/api/orders", {
         userId: user?.id,
         cartItems: cart,
@@ -253,15 +281,15 @@ function Chackout() {
       dispatch(setIsCartItemUnauthentificated([]));
       setLoading(false);
       setSuccess(true);
+      const timeOut = setTimeout(() => {
+        setSuccess(false);
+        router.push("/");
+      }, 1000);
+      return () => clearTimeout(timeOut);
     } catch (error) {
       console.log(error);
     } finally {
       setLoading(false);
-      const timeOut = setTimeout(() => {
-        setSuccess(false);
-      }, 1000);
-      router.push("/");
-      return () => clearTimeout(timeOut);
     }
   };
 
@@ -809,7 +837,7 @@ function Chackout() {
                         </div>
                         <div className="border p-2 w-full rounded-lg">
                           <h1 className="py-4">გადაიხადე ბარათით</h1>
-                          <Form onFinish={handleModalSubmit}>
+                          <Form form={form} onFinish={handleModalSubmit}>
                             <Form.Item name="cardNumber">
                               <div className="relative w-full">
                                 <Input

@@ -31,13 +31,22 @@ function page({ params }: ProfileProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const { getWishlistItems } = useGetWishlistItems();
   const wishlist = useAppSelector((state) => state.global.isWishlist);
+
+  const getOrders = async () => {
+    try {
+      const resp = await axios.get("/api/orders");
+      setOrders(resp.data.orders);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleParams = async (par: string) => {
     if (par === "addresses") {
       const resp = await axios.get("/api/shippingaddress");
       setSippingAddress(resp.data);
     } else if (par === "orders") {
-      const resp = await axios.get("/api/orders");
-      setOrders(resp.data.orders);
+      await getOrders();
     }
   };
   useEffect(() => {
@@ -56,6 +65,7 @@ function page({ params }: ProfileProps) {
       console.log(error);
     }
   };
+
   const deleteOrder = async (id: number) => {
     try {
       await axios.delete("/api/orders", {
@@ -63,7 +73,7 @@ function page({ params }: ProfileProps) {
           orderId: id,
         },
       });
-      await handleParams(name);
+      await getOrders();
       console.log("delete succesfuly");
     } catch (error) {
       console.log(error);
