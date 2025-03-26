@@ -13,10 +13,12 @@ export default function useAddToCartMain() {
   const { addToCart, loadingStates, setLoadingStates } = useAddToCart();
 
   const addToCartWithVariants = async (cartItem: Product) => {
+    console.log("ucntion id", cartItem.id);
     setLoadingStates((prev) => ({
       ...prev,
       [cartItem.id]: true,
     }));
+
     if (cartItem.variants.length !== 0) {
       const variantDetails: variantDetailsProps[] = cartItem.variants.map(
         (variant) => {

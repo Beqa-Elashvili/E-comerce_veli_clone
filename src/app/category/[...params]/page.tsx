@@ -12,6 +12,7 @@ import { Frown, ChevronLeft } from "lucide-react";
 import useGetIsWishlist from "@/app/actions/getIswishlist";
 import { useSession } from "next-auth/react";
 import { GridLoader } from "react-spinners";
+import LoadingModal from "@/app/(components)/LoadingModal";
 
 type CategorysProps = {
   params: Promise<{
@@ -29,6 +30,7 @@ function Categorys({ params }: CategorysProps) {
   const { addWishlistItem } = useAddinWinshilst();
   const { addToCartWithVariants, loadingStates } = useAddToCartMain();
   const { IsWishlist } = useGetIsWishlist();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const user = useAppSelector((state) => state.user.user);
   const cart = useAppSelector(
@@ -42,6 +44,7 @@ function Categorys({ params }: CategorysProps) {
 
   async function getCategorysProducts() {
     try {
+      setLoading(true);
       if (encodeURIComponent(name[0]) === "q") {
         const resp = await axios.get(
           `/api/products?query=${categoryName.slice(2)}`
@@ -56,10 +59,15 @@ function Categorys({ params }: CategorysProps) {
       );
 
       setProducts(resp.data.category);
+      setLoading(false);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   }
+
+  console.log(loadingStates);
 
   useEffect(() => {
     getCategorysProducts();
@@ -87,6 +95,12 @@ function Categorys({ params }: CategorysProps) {
       ) || false
     );
   };
+  if (loading)
+    return (
+      <div className="min-h-screen">
+        <LoadingModal />
+      </div>
+    );
 
   return (
     <div className="w-full min-h-screen">
@@ -162,7 +176,7 @@ function Categorys({ params }: CategorysProps) {
                     )}
                     <div className="text-start md:h-20 mt-2">
                       <p className="font-semibold text-sm">{Product.price} ₾</p>
-                      <p className="text-sm h-10 w-28 hidde md:block mt-2">
+                      <p className="text-sm h-10 w-28 md:w-full  mt-2">
                         {Product.description?.slice(0, 20)}...
                       </p>
                     </div>
@@ -298,7 +312,7 @@ function Categorys({ params }: CategorysProps) {
                               <p className="font-semibold text-sm">
                                 {Product.price} ₾
                               </p>
-                              <p className="text-sm h-10 w-28 hidde md:block mt-2">
+                              <p className="text-sm h-10 w-28 md:w-full mt-2">
                                 {Product.description?.slice(0, 20)}...
                               </p>
                             </div>
@@ -423,7 +437,7 @@ function Categorys({ params }: CategorysProps) {
                                         <p className="font-semibold text-sm">
                                           {product.price} ₾
                                         </p>
-                                        <p className="text-sm h-10 w-28 hidde md:block mt-2">
+                                        <p className="text-sm h-10 w-28 md:w-full mt-2">
                                           {product.description?.slice(0, 20)}...
                                         </p>
                                       </div>
@@ -473,6 +487,7 @@ function Categorys({ params }: CategorysProps) {
                       <>
                         {products?.Product.map((Product: Product) => {
                           const isCart = handleIsCart(Product.id);
+                          console.log("products id",Product.id)
                           return (
                             <div
                               key={Product.id}
@@ -537,7 +552,7 @@ function Categorys({ params }: CategorysProps) {
                                     <p className="font-semibold text-sm">
                                       {Product.price} ₾
                                     </p>
-                                    <p className="text-sm h-10 w-28 hidde md:block mt-2">
+                                    <p className="text-sm h-10 w-28 md:w-full mt-2">
                                       {Product.description?.slice(0, 20)}...
                                     </p>
                                   </div>
