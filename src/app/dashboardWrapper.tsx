@@ -175,7 +175,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   <button className="bg-black gap-2  flex items-center border rounded-xl h-12  px-4">
                     <img
                       className="h-6 w-6 object-contain"
-                      src="/apple_logo.png"
+                      src="/Apple-logo.png"
                       alt="apple-icon"
                     />
                     <div className="text-start">
