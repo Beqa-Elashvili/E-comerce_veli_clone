@@ -14,8 +14,6 @@ import useHandleCartquantity from "../hooks/useHandleCartQuantity";
 import useAddToCartMain from "../hooks/addToCartMain";
 import { useRouter } from "next/navigation";
 import { useAuthModal } from "../(components)/authModal";
-import LoadingModal from "../(components)/LoadingModal";
-import useGetCartItems from "../hooks/getCartItems";
 
 function Cart() {
   const { status } = useSession();
@@ -27,12 +25,10 @@ function Cart() {
   const { addToCart, loadingStates, setLoadingStates } = useAddToCart();
   const { addToCartWithVariants, loadingStates: productLoad } =
     useAddToCartMain();
-  const { loading } = useGetCartItems();
+
   const { handleCartQuantity, handleTotalPrice } = useHandleCartquantity();
   const [sortOption, setSortOption] = useState<string>("price_low_to_high");
   const { isAuthModalOpen, setIsAuthModalOpen } = useAuthModal();
-
-  console.log(loading);
   useEffect(() => {
     if (isAuthModalOpen) {
       document.body.style.overflow = "hidden";
@@ -142,13 +138,6 @@ function Cart() {
   useEffect(() => {
     sortCart(sortOption);
   }, [sortOption, cart]);
-
-  if (loading)
-    return (
-      <div className="min-h-screen">
-        <LoadingModal />
-      </div>
-    );
 
   return (
     <div className="min-h-screen relative lg:h-full pb-12">
@@ -321,3 +310,6 @@ function Cart() {
 }
 
 export default Cart;
+function usecallback(arg0: () => void, arg1: never[]) {
+  throw new Error("Function not implemented.");
+}
