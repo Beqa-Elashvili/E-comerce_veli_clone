@@ -487,7 +487,6 @@ function Categorys({ params }: CategorysProps) {
                       <>
                         {products?.Product.map((Product: Product) => {
                           const isCart = handleIsCart(Product.id);
-                          console.log("products id",Product.id)
                           return (
                             <div
                               key={Product.id}
