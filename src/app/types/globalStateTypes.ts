@@ -113,9 +113,9 @@ export interface Category {
 }
 
 export interface OrderItem {
-  address: ReactNode;
-  selectedColor: ReactNode;
-  selectedSize: ReactNode;
+  address: string;
+  selectedColor: string;
+  selectedSize: string;
   id: number;
   orderId: number;
   productId: number;
