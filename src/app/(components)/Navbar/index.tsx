@@ -447,12 +447,13 @@ const Navbar = () => {
                                 {cart?.length !== 0 && (
                                   <>
                                     <div className="flex items-center justify-center gap-4">
-                                      <div
+                                      <button
+                                        disabled={Load[item.productId]}
                                         onClick={() => handleAddToCart(item)}
                                         className="h-8 w-8 cursor-pointer hover:bg-gray-200 rounded-full border flex items-center justify-center"
                                       >
                                         +
-                                      </div>
+                                      </button>
                                       {loadingStates[
                                         status === "unauthenticated"
                                           ? item.id
@@ -473,12 +474,13 @@ const Navbar = () => {
                                       ) : (
                                         <h1>{handleQuantityIncart(item)}</h1>
                                       )}
-                                      <div
+                                      <button
+                                        disabled={Load[item.productId]}
                                         onClick={() => handleCartItemId(item)}
                                         className="h-8 w-8 cursor-pointer hover:bg-gray-200 rounded-full border flex items-center justify-center"
                                       >
                                         -
-                                      </div>
+                                      </button>
                                       <button
                                         className="hover:text-gray-600"
                                         onClick={() =>
