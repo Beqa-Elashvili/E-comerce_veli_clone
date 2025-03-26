@@ -14,6 +14,8 @@ import useHandleCartquantity from "../hooks/useHandleCartQuantity";
 import useAddToCartMain from "../hooks/addToCartMain";
 import { useRouter } from "next/navigation";
 import { useAuthModal } from "../(components)/authModal";
+import LoadingModal from "../(components)/LoadingModal";
+import useGetCartItems from "../hooks/getCartItems";
 
 function Cart() {
   const { status } = useSession();
@@ -25,10 +27,12 @@ function Cart() {
   const { addToCart, loadingStates, setLoadingStates } = useAddToCart();
   const { addToCartWithVariants, loadingStates: productLoad } =
     useAddToCartMain();
+  const { loading } = useGetCartItems();
   const { handleCartQuantity, handleTotalPrice } = useHandleCartquantity();
   const [sortOption, setSortOption] = useState<string>("price_low_to_high");
   const { isAuthModalOpen, setIsAuthModalOpen } = useAuthModal();
 
+  console.log(loading);
   useEffect(() => {
     if (isAuthModalOpen) {
       document.body.style.overflow = "hidden";
@@ -139,6 +143,13 @@ function Cart() {
     sortCart(sortOption);
   }, [sortOption, cart]);
 
+  if (loading)
+    return (
+      <div className="min-h-screen">
+        <LoadingModal />
+      </div>
+    );
+
   return (
     <div className="min-h-screen relative lg:h-full pb-12">
       <div className="block lg:flex gap-2 h-full relative items-start">
@@ -217,12 +228,16 @@ function Cart() {
                         </div>
                       </div>
                       <div className="flex items-center justify-start my-2 lg:my-0 lg:justify-center gap-4">
-                        <div
+                        <button
+                          disabled={
+                            productLoad[item.productId] ||
+                            loadingStates[item.productId]
+                          }
                           onClick={() => handleAddToCart(item)}
                           className="h-8 w-8 cursor-pointer hover:bg-gray-200 rounded-full border flex items-center justify-center"
                         >
                           +
-                        </div>
+                        </button>
                         {loadingStates[
                           status === "unauthenticated"
                             ? item.id
@@ -243,12 +258,16 @@ function Cart() {
                         ) : (
                           <h1>{handleQuantityIncart(item)}</h1>
                         )}
-                        <div
+                        <button
+                          disabled={
+                            productLoad[item.productId] ||
+                            loadingStates[item.productId]
+                          }
                           onClick={() => handleCartItemId(item)}
                           className="h-8 w-8 cursor-pointer hover:bg-gray-200 rounded-full border flex items-center justify-center"
                         >
                           -
-                        </div>
+                        </button>
                         <button
                           className="hover:text-gray-600"
                           onClick={() => deleteCartItem(item, false)}

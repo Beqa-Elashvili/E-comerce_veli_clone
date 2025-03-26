@@ -283,7 +283,7 @@ function Chackout() {
       setSuccess(true);
       const timeOut = setTimeout(() => {
         setSuccess(false);
-        router.push("/");
+        router.push("/profile/orders");
       }, 1000);
       return () => clearTimeout(timeOut);
     } catch (error) {

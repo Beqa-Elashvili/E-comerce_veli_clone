@@ -113,6 +113,9 @@ export interface Category {
 }
 
 export interface OrderItem {
+  address: ReactNode;
+  selectedColor: ReactNode;
+  selectedSize: ReactNode;
   id: number;
   orderId: number;
   productId: number;
@@ -141,6 +144,7 @@ export interface CartItem {
 }
 
 export interface Order {
+  shippingAddressId: number;
   id: number;
   orderNumber: string;
   userId: number;

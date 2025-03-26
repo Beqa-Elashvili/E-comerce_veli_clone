@@ -15,9 +15,9 @@ import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import { GridLoader } from "react-spinners";
 import { useRouter } from "next/navigation";
-import CarouselComp from "@/app/(components)/Carousel/Carousel";
 import useAddToCartMain from "@/app/hooks/addToCartMain";
 import { setIsAuthModalOpen } from "@/redux/globalSlice";
+import LoadingModal from "@/app/(components)/LoadingModal";
 
 type ProductIdProps = {
   params: Promise<{
@@ -41,7 +41,8 @@ function ProductId({ params }: ProductIdProps) {
   const { params: routeParams } = React.use(params);
   const [id] = routeParams || [];
 
-  const { addToCartWithVariants } = useAddToCartMain();
+  const { addToCartWithVariants, loadingStates: loadState } =
+    useAddToCartMain();
   const cart = useAppSelector(
     (state) => state.global.isCartItemUnauthentificated
   );
@@ -56,8 +57,11 @@ function ProductId({ params }: ProductIdProps) {
       try {
         if (id) {
           const resp = await axios.get(`/api/products?id=${id}`);
+          const encodedCategoryName = encodeURIComponent(
+            resp.data.product.category.name
+          );
           const respCart = await axios.get(
-            `/api/categories?name=${resp.data.product.category.name}`
+            `/api/categories?name=${encodedCategoryName}`
           );
           setSupportProducts(respCart.data.category.Product);
           setProduct(resp.data.product);
@@ -73,8 +77,13 @@ function ProductId({ params }: ProductIdProps) {
     getProduct();
   }, [id]);
 
-  if (loading) return <div className="min-h-screen">..Loading</div>;
-  if (!product) return <div>laod product</div>;
+  if (loading)
+    return (
+      <div className="min-h-screen">
+        <LoadingModal />
+      </div>
+    );
+  if (!product) return <div className="min-h-screen">laod product</div>;
 
   const variantDetails = product.variants.map((variant) => {
     const color = product.Color.find((color) => color.id === variant.colorId);
@@ -416,12 +425,13 @@ function ProductId({ params }: ProductIdProps) {
           <hr />
           {cart?.length !== 0 && (
             <div className="flex items-center justify-center gap-4">
-              <div
+              <button
+                disabled={loadingStates[product.id]}
                 onClick={handleAddToCart}
                 className="h-8 w-8 cursor-pointer hover:bg-gray-200 rounded-full border flex items-center justify-center"
               >
                 +
-              </div>
+              </button>
               {loadingStates[product.id] ? (
                 <>
                   <GridLoader color="#525fd16c" size={4} className="w-6" />
@@ -429,12 +439,13 @@ function ProductId({ params }: ProductIdProps) {
               ) : (
                 <h1>{handleQuantityIncart(product.id)}</h1>
               )}
-              <div
+              <button
+                disabled={loadingStates[product.id]}
                 onClick={() => handleCartItemId(product.id)}
                 className="h-8 w-8 cursor-pointer hover:bg-gray-200 rounded-full border flex items-center justify-center"
               >
                 -
-              </div>
+              </button>
             </div>
           )}
           <button
@@ -467,7 +478,7 @@ function ProductId({ params }: ProductIdProps) {
               <div key={product.id} className="px-2 min-w-40 md:px-4">
                 <div
                   onClick={() => router.push(`/productId/${product.id}`)}
-                  className="rounded-lg h-[270px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+                  className="rounded-lg h-[270px] md:h-[320px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
                 >
                   <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
                     <div className="flex flex-col items-center gap-2 ">
@@ -483,13 +494,23 @@ function ProductId({ params }: ProductIdProps) {
                           IsWishlist(product.id) && "fill-red-500 text-red-500"
                         }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
                       />
-                      <ShoppingCart
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCartWithVariants(product);
-                        }}
-                        className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
-                      />
+                      {loadState[product.id] ? (
+                        <div className="bg-white w-8 h-8 border rounded-lg p-1">
+                          <GridLoader
+                            color="#525fd16c"
+                            size={4}
+                            className="w-6"
+                          />
+                        </div>
+                      ) : (
+                        <ShoppingCart
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCartWithVariants(product);
+                          }}
+                          className="w-8 h-8 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="md:hover:bg-gray-100 p-2 overflow-hidden rounded-lg">
@@ -527,13 +548,23 @@ function ProductId({ params }: ProductIdProps) {
                         IsWishlist(product.id) && "fill-red-500 text-red-500"
                       }  cursor-pointer hover:text-red-500  border rounded-lg bg-white p-1`}
                     />
-                    <ShoppingCart
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addToCartWithVariants(product);
-                      }}
-                      className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
-                    />
+                    {loadState[product.id] ? (
+                      <div className="bg-white w-8 h-8 border rounded-lg p-1">
+                        <GridLoader
+                          color="#525fd16c"
+                          size={4}
+                          className="w-6"
+                        />
+                      </div>
+                    ) : (
+                      <ShoppingCart
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCartWithVariants(product);
+                        }}
+                        className=" h-8 w-1/2 border cursor-pointer hover:text-gray-500 rounded-lg bg-white p-1"
+                      />
+                    )}
                   </div>
                 </div>
               </div>

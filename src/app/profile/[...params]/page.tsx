@@ -10,12 +10,16 @@ import {
   Settings,
   MoveLeftIcon,
   ChevronLeft,
+  X,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import axios from "axios";
 import useGetWishlistItems from "@/app/hooks/getWislistItems";
 import { Order, ShippingAddress } from "@/app/types/globalStateTypes";
+import LoadingModal from "@/app/(components)/LoadingModal";
 
 type ProfileProps = {
   params: Promise<{
@@ -25,8 +29,14 @@ type ProfileProps = {
 function page({ params }: ProfileProps) {
   const router = useRouter();
   const user = useAppSelector((state) => state.user.user);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<{
+    [key: string]: boolean;
+  }>({});
+
   const { params: routeParams } = use(params);
   const [name] = routeParams || [];
+
   const [shippingAddress, setSippingAddress] = useState<ShippingAddress[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const { getWishlistItems } = useGetWishlistItems();
@@ -37,20 +47,26 @@ function page({ params }: ProfileProps) {
       const resp = await axios.get("/api/orders");
       setOrders(resp.data.orders);
     } catch (error) {
+      setOrders([]);
       console.log(error);
     }
   };
 
-  const handleParams = async (par: string) => {
-    if (par === "addresses") {
+  const handleParams = async () => {
+    try {
+      setLoading(true);
       const resp = await axios.get("/api/shippingaddress");
       setSippingAddress(resp.data);
-    } else if (par === "orders") {
       await getOrders();
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
-    handleParams(name);
+    handleParams();
   }, [name]);
 
   const deleteWishlistItem = async (id: number) => {
@@ -84,6 +100,13 @@ function page({ params }: ProfileProps) {
     signOut();
     router.push("/");
   };
+
+  if (loading)
+    return (
+      <div className="min-h-screen">
+        <LoadingModal />
+      </div>
+    );
 
   const handleName = () => {
     if (name === "addresses") {
@@ -183,35 +206,91 @@ function page({ params }: ProfileProps) {
           {orders && orders.length !== 0 ? (
             <div className="w-full flex flex-col gap-4">
               <h1 className="text-2xl font-semibold">შეკვეთები</h1>
-              {orders.map((item) => (
-                <div key={item.id}>
-                  <div className="flex justify-between p-2 items-center w-full">
-                    <div className="flex items-center gap-4">
-                      <div>
+              {orders.map((item) => {
+                const FoundAddress = shippingAddress.find(
+                  (address) => address.id === item.shippingAddressId
+                );
+                return (
+                  <div
+                    onClick={() => {
+                      setIsOpen((prev) => ({
+                        ...prev,
+                        [item.id]: !isOpen[item.id],
+                      }));
+                    }}
+                    key={item.id}
+                  >
+                    <div className="flex justify-between p-2 items-center w-full">
+                      <div className="flex items-center gap-4">
                         <div>
-                          <h1 className="text-sm font-semiboold">
-                            id: {item.orderNumber}
-                          </h1>
-                          <div className="font-semibold flex gap-2">
-                            <p className="text-sm">სულ გადახდილი:</p>
-                            {item.totalAmount} ₾
+                          <div>
+                            <h1 className="text-sm font-semiboold">
+                              id: {item.orderNumber}
+                            </h1>
+                            <h1 className="text-sm">status: {item.status}</h1>
+                            <div className="font-semibold flex gap-2">
+                              <p className="text-sm">სულ გადახდილი:</p>
+                              {item.totalAmount} ₾
+                            </div>
                           </div>
                         </div>
                       </div>
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => deleteOrder(item.id)}
+                          className="border self-end h-8 w-8 flex items-center justify-center text-white bg-red-500  rounded-full"
+                        >
+                          <X />
+                        </button>
+                        {isOpen[item.id] ? (
+                          <ChevronUp className="cursor-pointer w-8 h-8 rounded-full flex items-center justify-center bg-green-400" />
+                        ) : (
+                          <ChevronDown className="cursor-pointer w-8 h-8 rounded-full flex items-center justify-center bg-green-400" />
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-2">
-                      <button
-                        onClick={() => deleteOrder(item.id)}
-                        className="border text-white bg-red-500 w-full rounded-lg"
-                      >
-                        წაშლა
-                      </button>
-                      <h1 className="text-sm">status:{item.status}</h1>
-                    </div>
+                    {isOpen[item.id] && (
+                      <>
+                        {item.items.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex py-2 justify-between"
+                          >
+                            <div className="flex flex-col gap-2">
+                              <div className="flex gap-2">
+                                <h1 className="font-semibold">მისამართი:</h1>
+                                <p>{FoundAddress?.address}</p>
+                              </div>
+                              <h1 className="text-xl font-semibold">
+                                {item.product.name}
+                              </h1>
+                              <div className="flex gap-2">
+                                <h1 className="font-semibold">ვარიანტი</h1>
+                                <p>{item.selectedSize}</p>
+                                <p>{item.selectedColor}</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <h1 className="font-semibold">რაოდენობა</h1>
+                                <p>{item.quantity}</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <h1 className="font-semibold">ფასი:</h1>
+                                <p>{item.price}</p>
+                              </div>
+                            </div>
+                            <img
+                              className="size-32 md:size-40 object-contain"
+                              src={item.product.images[0].url}
+                              alt="product-img"
+                            />
+                          </div>
+                        ))}
+                      </>
+                    )}
+                    <hr />
                   </div>
-                  <hr />
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="bg-gray-100 p-4 w-full rounded-xl flex justify-between items-center">

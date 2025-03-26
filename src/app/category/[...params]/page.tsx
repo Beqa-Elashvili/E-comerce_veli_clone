@@ -110,7 +110,7 @@ function Categorys({ params }: CategorysProps) {
               <div key={Product.id} className="px-2 w-full md:px-4">
                 <div
                   onClick={() => router.push(`/productId/${Product.id}`)}
-                  className="rounded-lg h-[270px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+                  className="rounded-lg h-[270px] md:h-[320px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
                 >
                   <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
                     <div className="flex flex-col items-center gap-2 ">
@@ -243,7 +243,7 @@ function Categorys({ params }: CategorysProps) {
                           onClick={() =>
                             router.push(`/productId/${Product.id}`)
                           }
-                          className="rounded-lg h-[270px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+                          className="rounded-lg h-[270px] md:h-[320px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
                         >
                           <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
                             <div className="flex flex-col items-center gap-2 ">
@@ -368,7 +368,7 @@ function Categorys({ params }: CategorysProps) {
                                     onClick={() =>
                                       router.push(`/productId/${product.id}`)
                                     }
-                                    className="rounded-lg h-[270px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+                                    className="rounded-lg h-[270px] md:h-[320px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
                                   >
                                     <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
                                       <div className="flex flex-col items-center gap-2 ">
@@ -482,7 +482,7 @@ function Categorys({ params }: CategorysProps) {
                                 onClick={() =>
                                   router.push(`/productId/${Product.id}`)
                                 }
-                                className="rounded-lg h-[270px] md:h-[300px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
+                                className="rounded-lg h-[270px] md:h-[320px] md:hover:bg-gray-100 relative text-center overflow-hidden cursor-pointer max-w-52"
                               >
                                 <div className="absolute hidden md:flex inset-0  opacity-0   gap-2 md:hover:opacity-100 mt-6 justify-end transition  duration-500 hover:-translate-x-5 ">
                                   <div className="flex flex-col items-center gap-2 ">

@@ -17,15 +17,18 @@ import useGetCartItems from "@/app/hooks/getCartItems";
 import { setIsAuthModalOpen } from "@/redux/globalSlice";
 
 function Register() {
+  const { status } = useSession();
+  const { getUser } = useGetUser();
+  const { GetCart } = useGetCartItems();
+
   const [showPassword, setShowPassword] = useState({
     password: false,
     repeatPassword: false,
   });
   const [loading, setLoading] = useState<boolean>(false);
-  const { status } = useSession();
 
-  const { getUser } = useGetUser();
-  const { GetCart } = useGetCartItems();
+  const dispatch = useAppDispatch();
+  const isRegisterForm = useAppSelector((state) => state.global.isRegisterForm);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -82,6 +85,7 @@ function Register() {
         });
 
         toast.success("თქვენ წარმატებით დარეგისტრირდით!");
+        setLoading(false);
         dispatch(setIsRegisterForm(false));
       } else {
         setLoading(true);
@@ -135,9 +139,6 @@ function Register() {
       [field]: !prev[field],
     }));
   };
-
-  const dispatch = useAppDispatch();
-  const isRegisterForm = useAppSelector((state) => state.global.isRegisterForm);
 
   const toggleIsRegisterForm = (value: string) => {
     if (value === "LOGIN") {
